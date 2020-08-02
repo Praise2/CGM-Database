@@ -1,5 +1,5 @@
-
-cx-Freeze=6.2
+Pillow<==7.2.0
+cx-Freeze==6.2
 matplotlib==3.3.0
 tkcalendar==1.6.1
 
