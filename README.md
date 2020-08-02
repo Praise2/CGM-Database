@@ -57,6 +57,7 @@ CGM Database Desktop App
 Contributions are welcome 😄
 
  - Pull requests
+ 
     Just a few guidelines:
       - Write clean code with appropriate comments and add suitable error handling.
       - Test the application and make sure no bugs/ issues come up.
