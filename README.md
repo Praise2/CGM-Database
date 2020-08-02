@@ -29,11 +29,11 @@ CGM Database Desktop App
 - View list of members and attendance list.
 - View bar chart and line chart of attendance list.
 
-**ToDo**
+**[ToDo]**
   Resolve Bugs/Issues if any found.
   Optimize Code to make it faster.
   
-**Contribution**
+**[Contribution]**
 Contributions are welcome 😄
 
  - Pull requests
