@@ -3,7 +3,7 @@ CGM Database Desktop App
 
 ##Table of Cotents:
 
-**[Installation](Installation)**
+**[Installation](/Installation)**
     
 **[Usage]**
 - Input data into member Database from the Home Tab.
