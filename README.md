@@ -3,7 +3,7 @@ CGM Database Desktop App
 
 ##Table of Cotents:
 
-**[Installation](/Installation)**
+**[Installation](#Installation)**
     
 **[Usage]**
 - Input data into member Database from the Home Tab.
@@ -27,7 +27,7 @@ Contributions are welcome 😄
  - Issues
    If you find any bugs/issues, raise an issue.
 
-Installation
+#Installation
 1. Download and install Python3 from [here](https://www.python.org/downloads/)
 
 2. I recommend using virtualenv. Download virtualenv by opening a terminal and typing:
