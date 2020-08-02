@@ -12,6 +12,7 @@ CGM Database Desktop App
 **[Contribution](#contributions)**
    
 <a name="installation"/>
+
 ## Installation
 
 1. Download and install Python3 from [here](https://www.python.org/downloads/)
@@ -33,6 +34,7 @@ CGM Database Desktop App
     pip install -r requirements.txt
     
 <a name="usage"/>  
+
 ## Usage
  - Input data into member Database from the Home Tab.
 - Input data into attendance Database from the Attendance Tab.
@@ -41,11 +43,13 @@ CGM Database Desktop App
 - View bar chart and line chart of attendance list.
 
 <a name="todo"/> 
+
 ## Todo
  Resolve Bugs/Issues if any found.
   Optimize Code to make it faster.
 
 <a name="contributions"/> 
+
 ## Contributions
 Contributions are welcome 😄
 
