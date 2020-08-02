@@ -27,15 +27,18 @@ CGM Database Desktop App
       activate
 
 4. Clone this repository, extract it if you downloaded a .zip or .tar file and cd into the cloned repository.
+
     For Example:
     cd A:\CGM-Database-master
   
 5. Install the required packages by typing:
+
     pip install -r requirements.txt
     
 <a name="usage"/>  
 
 ## Usage
+
  - Input data into member Database from the Home Tab.
 - Input data into attendance Database from the Attendance Tab.
 - Search, Edit or Update data in DB.
@@ -45,8 +48,8 @@ CGM Database Desktop App
 <a name="todo"/> 
 
 ## Todo
- Resolve Bugs/Issues if any found.
-  Optimize Code to make it faster.
+ - Resolve Bugs/Issues if any found.
+ - Optimize Code to make it faster.
 
 <a name="contributions"/> 
 
