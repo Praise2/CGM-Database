@@ -1,5 +1,6 @@
 # CGM-Database
 CGM Database Desktop App
+with python 3
 
 ## Table of Cotents:
 
