@@ -1,7 +1,7 @@
 # CGM-Database
 CGM Database Desktop App
 
-##Table of Cotents:
+## Table of Cotents:
 
 **[Installation](#installation)**
     
@@ -28,8 +28,7 @@ Contributions are welcome 😄
    If you find any bugs/issues, raise an issue.
    
 <a name="installation"/>
-##Installation
-
+## Installation
 1. Download and install Python3 from [here](https://www.python.org/downloads/)
 
 2. I recommend using virtualenv. Download virtualenv by opening a terminal and typing:
