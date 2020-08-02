@@ -3,7 +3,8 @@ CGM Database Desktop App
 
 ##Table of Cotents:
 
-**[Installation]**
+**[Installation](Installation)**
+Installation
 1. Download and install Python3 from [here](https://www.python.org/downloads/)
 
 2. I recommend using virtualenv. Download virtualenv by opening a terminal and typing:
@@ -21,7 +22,7 @@ CGM Database Desktop App
   
 5. Install the required packages by typing:
     pip install -r requirements.txt
-require"Installation"
+
     
 **[Usage]**
 - Input data into member Database from the Home Tab.
