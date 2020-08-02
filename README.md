@@ -2,4 +2,7 @@
 CGM Database Desktop App
 
 ##Table of Cotents:
-link [Installation]
+Installation
+Usage
+ToDo
+**Contributing**
