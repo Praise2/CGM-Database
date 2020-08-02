@@ -23,6 +23,11 @@ CGM Database Desktop App
     pip install -r requirements.txt
     
 **[Usage]**
+- Input data into member Database from the Home Tab.
+- Input data into attendance Database from the Attendance Tab.
+- Search, Edit or Update data in DB.
+- View list of members and attendance list.
+- View bar chart and line chart of attendance list.
 
 **ToDo**
   Resolve Bugs/Issues if any found.
