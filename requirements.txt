@@ -1,1 +1,6 @@
+Pillow==2.8.0
+cx-Freeze=6.2
+matplotlib==3.3.0
+tkcalendar==1.6.1
 
+NB: Python 3.8.1
