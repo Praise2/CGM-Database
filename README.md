@@ -21,6 +21,7 @@ CGM Database Desktop App
   
 5. Install the required packages by typing:
     pip install -r requirements.txt
+require"Installation"
     
 **[Usage]**
 - Input data into member Database from the Home Tab.
