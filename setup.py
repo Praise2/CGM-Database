@@ -7,12 +7,12 @@ Usage:
 """
 
 import cx_Freeze
-from cx_Freeze import *
+# from cx_Freeze import *
 import sys
-import os
+# import os
 import os.path
-import tkinter
-import matplotlib
+# import tkinter
+# import matplotlib
 
 base = None
 if (sys.platform == "win32"):
