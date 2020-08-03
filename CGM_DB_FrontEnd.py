@@ -154,12 +154,17 @@ class Member:
         self.btnLogout = Button(TitleFrame, text='Logout', font=('arial', 12, 'bold'), height=1, width=11,
                                 bd=4, bg='orange red', command=logout, cursor='hand2')
         self.btnLogout.grid(row=0, column=2, padx=(200, 10), pady=10, sticky=E)
+        self.btnLogout.grid_columnconfigure(2, weight=1)  # New addition, to keep logout btn at the extreme left
 
         # ==========Notebook / Tabs============
         style = ttk.Style(self.root)
         style.configure("lefttab.TNotebook.Tab", padding=[40, 40], font=('arial', 11))
         style.configure("lefttab.TNotebook", tabposition='wn')
-        style.map("lefttab.TNotebook.Tab")
+
+        """
+        style.map("lefttab.TNotebook.Tab", foreground=[('pressed', 'red'), ('active', 'blue')],
+                  background=[('pressed', '!disabled', 'yellow'), ('active', 'orange')])
+        """
 
         # Tab Layout
         my_notebook = ttk.Notebook(self.root, style='lefttab.TNotebook')
@@ -687,7 +692,7 @@ class Member:
 
         DataFrameLEFT = LabelFrame(DataFrame, bd=1, padx=10, bg="Ghost white", relief=RIDGE,
                                    font=('arial', 20, 'bold'), text="Member Info\n", width=get_width*0.87, height=get_height*0.77)  # width=1000, height=700,
-        DataFrameLEFT.grid(row=0, column=0, padx=10, pady=(0, 8)) #, sticky=W)
+        DataFrameLEFT.grid(row=0, column=0, padx=18, pady=(0, 8)) #, sticky=W)
         for index in range(6):
             DataFrameLEFT.grid_columnconfigure(index, weight=1)
         DataFrameLEFT.grid_propagate(False)
@@ -700,7 +705,7 @@ class Member:
         # =========== Home Tab Labels and Entry Widget=============
         self.lblPrefix = Label(DataFrameLEFT, font=('arial', 15), text="Prefix:", padx=2, pady=2,
                                bg="Ghost White")
-        self.lblPrefix.grid(row=1, column=0, sticky=W)
+        self.lblPrefix.grid(row=1, column=0, padx=10, sticky=W)
         self.Prefix_combo = ttk.Combobox(DataFrameLEFT, textvariable=Prefix, state="readonly", font=('arial', 12),
                                          values=["Select Prefix", "Mr.", "Mrs.", "Miss.", "Dr.", "other"], width=23)
         self.Prefix_combo.grid(row=1, column=1)
@@ -708,25 +713,25 @@ class Member:
 
         self.lblF_name = Label(DataFrameLEFT, font=('arial', 15), text="First name:", padx=2, pady=2,
                                bg="Ghost White")
-        self.lblF_name.grid(row=2, column=0, sticky=W)
+        self.lblF_name.grid(row=2, column=0, padx=10, sticky=W)
         self.txtF_name = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Firstname, width=20, bd=2)
         self.txtF_name.grid(row=2, column=1, pady=5)
 
         self.lblS_name = Label(DataFrameLEFT, font=('arial', 15), text="Surname:", padx=2, pady=2,
                                bg="Ghost White")
-        self.lblS_name.grid(row=3, column=0, sticky=W)
+        self.lblS_name.grid(row=3, column=0, padx=10, sticky=W)
         self.txtS_name = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Surname, width=20)
         self.txtS_name.grid(row=3, column=1, padx=20, pady=5)
 
         self.lblM_name = Label(DataFrameLEFT, font=('arial', 15), text="Middle name:", padx=2, pady=2,
                                bg="Ghost White")
-        self.lblM_name.grid(row=4, column=0, sticky=W)
+        self.lblM_name.grid(row=4, column=0, padx=10, sticky=W)
         self.txtM_name = Entry(DataFrameLEFT, font=('arial', 15), textvariable=MiddleName, width=20)
         self.txtM_name.grid(row=4, column=1, pady=5)
 
         self.lblPosition = Label(DataFrameLEFT, font=('arial', 15), text="Position:", padx=2, pady=2,
                                  bg="Ghost White")
-        self.lblPosition.grid(row=5, column=0, sticky=W)
+        self.lblPosition.grid(row=5, column=0, padx=10, sticky=W)
         self.Position_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=ChurchPosition,
                                            values=Positions, font=('arial', 12), width=23)
         self.Position_combo.grid(row=5, column=1)
@@ -734,7 +739,7 @@ class Member:
 
         self.lblDepartment = Label(DataFrameLEFT, font=('arial', 15), text="Department:", padx=2, pady=2,
                                    bg="Ghost White")
-        self.lblDepartment.grid(row=6, column=0, sticky=W)
+        self.lblDepartment.grid(row=6, column=0, padx=10, sticky=W)
         self.Department_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=Department,
                                              values=Departments, font=('arial', 12), width=23)
         self.Department_combo.grid(row=6, column=1)
@@ -742,7 +747,7 @@ class Member:
 
         self.lblL_Center = Label(DataFrameLEFT, font=('arial', 15), text="Local Center:", padx=2, pady=2,
                                  bg="Ghost White")
-        self.lblL_Center.grid(row=7, column=0, sticky=W)
+        self.lblL_Center.grid(row=7, column=0, padx=10, sticky=W)
         self.L_Center_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=LocalCenter,
                                            values=LocalCenters, font=('arial', 12), width=23)
         self.L_Center_combo.grid(row=7, column=1)
@@ -750,7 +755,7 @@ class Member:
 
         self.lblDoB = Label(DataFrameLEFT, font=('arial', 15), text="Date of Birth:", padx=2, pady=2,
                             bg="Ghost White")
-        self.lblDoB.grid(row=1, column=2, sticky=W)
+        self.lblDoB.grid(row=1, column=2, padx=10, sticky=W)
         today = date.today()
         cal = DateEntry(DataFrameLEFT, font=('arial', 12), width=23, textvariable=DoB, locale='en_US',
                         date_pattern='dd/mm/yyyy',
@@ -758,13 +763,13 @@ class Member:
         cal.grid(row=1, column=3, padx=10, pady=5)
 
         self.lblAge = Label(DataFrameLEFT, font=('arial', 15), text="Age:", padx=2, pady=2, bg="Ghost White")
-        self.lblAge.grid(row=2, column=2, sticky=W)
+        self.lblAge.grid(row=2, column=2, padx=10, sticky=W)
         self.txtAge = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Age, width=20)
         self.txtAge.grid(row=2, column=3, pady=5)
 
         self.lblGender = Label(DataFrameLEFT, font=('arial', 15), text="Gender:", padx=2, pady=2,
                                bg="Ghost White")
-        self.lblGender.grid(row=3, column=2, sticky=W)
+        self.lblGender.grid(row=3, column=2, padx=10, sticky=W)
         self.Gender_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=Gender,
                                          values=["Select Gender", "Male", "Female"], font=('arial', 12), width=23)
         self.Gender_combo.grid(row=3, column=3)
@@ -772,36 +777,36 @@ class Member:
 
         self.lblRes_Adr = Label(DataFrameLEFT, font=('arial', 15), text="Res. Address:", padx=2, pady=2,
                                 bg="Ghost White")
-        self.lblRes_Adr.grid(row=4, column=2, sticky=W)
+        self.lblRes_Adr.grid(row=4, column=2, padx=10, sticky=W)
         self.txtRes_Adr = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Res_Address, width=20)
         self.txtRes_Adr.grid(row=4, column=3, pady=5)
 
         self.lblCity = Label(DataFrameLEFT, font=('arial', 15), text="City:", padx=2, pady=2, bg="Ghost White")
-        self.lblCity.grid(row=5, column=2, sticky=W)
+        self.lblCity.grid(row=5, column=2, padx=10, sticky=W)
         self.txtCity = Entry(DataFrameLEFT, font=('arial', 15), textvariable=City, width=20)
         self.txtCity.grid(row=5, column=3, pady=5)
 
         self.lblRegion = Label(DataFrameLEFT, font=('arial', 15), text="Region:", padx=2, pady=2, bg="Ghost White")
-        self.lblRegion.grid(row=6, column=2, sticky=W)
+        self.lblRegion.grid(row=6, column=2, padx=10, sticky=W)
         self.Region_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=Region, value=Regions,
                                          font=('arial', 12), width=23)
         self.Region_combo.grid(row=6, column=3)
         self.Region_combo.current(0)
 
         self.lblCountry = Label(DataFrameLEFT, font=('arial', 15), text="Country:", padx=2, pady=2, bg="Ghost White")
-        self.lblCountry.grid(row=7, column=2, sticky=W)
+        self.lblCountry.grid(row=7, column=2, padx=10, sticky=W)
         self.txtCountry = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Country, width=20)
         self.txtCountry.grid(row=7, column=3, pady=5)
 
         self.lblNationality = Label(DataFrameLEFT, font=('arial', 15), text="Nationality:", padx=2, pady=2,
                                     bg="Ghost White")
-        self.lblNationality.grid(row=1, column=4, sticky=W)
+        self.lblNationality.grid(row=1, column=4, padx=10, sticky=W)
         self.txtNationality = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Nationality, width=20)
         self.txtNationality.grid(row=1, column=5, pady=5)
 
         self.lblM_Status = Label(DataFrameLEFT, font=('arial', 15), text="Marital Status:", padx=2, pady=2,
                                  bg="Ghost White")
-        self.lblM_Status.grid(row=2, column=4, sticky=W)
+        self.lblM_Status.grid(row=2, column=4, padx=10, sticky=W)
         self.M_Status_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=MaritalStatus,
                                            font=('arial', 12),
                                            width=23, values=["Select Marital Status", "Married", "Single", "Widowed"])
@@ -809,31 +814,31 @@ class Member:
         self.M_Status_combo.current(0)
 
         self.lblEducation = Label(DataFrameLEFT, font=('arial', 15), text="Education", padx=2, pady=2, bg="Ghost White")
-        self.lblEducation.grid(row=3, column=4, sticky=W)
+        self.lblEducation.grid(row=3, column=4, padx=10, sticky=W)
         self.Education_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=Education,
                                             values=Education_levels, font=('arial', 12), width=23)
         self.Education_combo.grid(row=3, column=5)
         self.Education_combo.current(0)
 
         self.lblMobile = Label(DataFrameLEFT, font=('arial', 15), text="Mobile:", padx=2, pady=2, bg="Ghost White")
-        self.lblMobile.grid(row=4, column=4, sticky=W)
+        self.lblMobile.grid(row=4, column=4, padx=10, sticky=W)
         self.txtMobile = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Mobile, width=20)
         self.txtMobile.grid(row=4, column=5, pady=5)
 
         self.lblTelephone = Label(DataFrameLEFT, font=('arial', 15), text="Telephone:", padx=2, pady=2,
                                   bg="Ghost White")
-        self.lblTelephone.grid(row=5, column=4, sticky=W)
+        self.lblTelephone.grid(row=5, column=4, padx=10, sticky=W)
         self.txtTelephone = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Telephone, width=20)
         self.txtTelephone.grid(row=5, column=5, pady=5)
 
         self.lblEmail = Label(DataFrameLEFT, font=('arial', 15), text="Email:", padx=2, pady=2, bg="Ghost White")
-        self.lblEmail.grid(row=6, column=4, sticky=W)
+        self.lblEmail.grid(row=6, column=4, padx=10, sticky=W)
         self.txtEmail = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Email, width=20)
         self.txtEmail.grid(row=6, column=5, pady=5)
 
         self.lblOccupation = Label(DataFrameLEFT, font=('arial', 15), text="Occupation:", padx=2, pady=2,
                                    bg="Ghost White")
-        self.lblOccupation.grid(row=7, column=4, sticky=W)
+        self.lblOccupation.grid(row=7, column=4, padx=10, sticky=W)
         self.txtOccupation = Entry(DataFrameLEFT, font=('arial', 15), textvariable=Occupation, width=20)
         self.txtOccupation.grid(row=7, column=5, pady=5)
 
@@ -908,7 +913,7 @@ class Member:
 
         # exit Button
         exit_image = ImageTk.PhotoImage(Image.open("Exit_icon.jpg"))
-        self.btnExit = Button(my_notebook, image=exit_image, height=100, width=176, command=iExit, cursor='hand2')
+        self.btnExit = Button(my_notebook, image=exit_image, height=100, width=173, command=iExit, cursor='hand2') # changed width from 176
         self.btnExit.image = exit_image
         self.btnExit.place(x=0, y=317)
 
@@ -919,7 +924,7 @@ class Member:
         View_DataFrame.grid(row=0, column=0)   # pack( fill=X, expand=True)
 
         View_DataFrameLEFT = Frame(View_DataFrame, bd=1, padx=10, bg="Ghost white", relief=RIDGE, width=get_width*0.87, height=get_height*0.77)
-        View_DataFrameLEFT.grid(padx=10, pady=5)  # pack(fill=X, expand=True, padx=10)
+        View_DataFrameLEFT.grid(padx=18, pady=5)  # pack(fill=X, expand=True, padx=10)
         View_DataFrameLEFT.grid_columnconfigure(1, weight=1)
         View_DataFrameLEFT.grid_propagate(False)
         View_DataFrameLEFT.pack_propagate(False)
