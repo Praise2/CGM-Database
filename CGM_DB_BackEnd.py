@@ -7,20 +7,20 @@ def memberData():
     cur.execute("CREATE TABLE IF NOT EXISTS memberCGM (id INTEGER PRIMARY KEY, Prefix text, Firstname text, Surname text, \
                 MiddleName text, ChurchPosition text, Department text, LocalCenter text, DoB text, Age text, Gender text, \
                  Address text, City text, Region text, Country text, Nationality text, MaritalStatus text, Education text, \
-                 Mobile text, Telephone text, Email text, Occupation text, ChurchStatus text, Photo Blob)")
+                 Mobile text, Telephone text, Email text, Occupation text, ChurchStatus text, Photo Blob, Has_synced text)")
     con.commit()
     con.close()
 
 
 def addMemberRec(Prefix, Firstname, Surname, MiddleName, ChurchPosition, Department, LocalCenter, DoB, Age, Gender,
                  Address, City, Region, Country, Nationality, MaritalStatus, Education, Mobile, Telephone, Email,
-                 Occupation, ChurchStatus, Photo):
+                 Occupation, ChurchStatus, Photo, Has_synced):
     con = sqlite3.connect("memberCGM.db")
     cur = con.cursor()
-    cur.execute("INSERT INTO memberCGM VALUES (NULL, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+    cur.execute("INSERT INTO memberCGM VALUES (NULL, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (Prefix, Firstname, Surname, MiddleName, ChurchPosition, Department, LocalCenter, DoB, Age, Gender,
                  Address, City, Region, Country, Nationality, MaritalStatus, Education, Mobile, Telephone, Email,
-                 Occupation, ChurchStatus, Photo))
+                 Occupation, ChurchStatus, Photo, Has_synced))
     con.commit()
     con.close()
 
@@ -33,17 +33,6 @@ def viewData():
     con.close()
     return rows
 
-"""
-def searchFirstname(Firstname=""):
-    con = sqlite3.connect("memberCGM.db")
-    cur = con.cursor()
-    cur.execute("SELECT * FROM memberCGM WHERE Firstname=?", (Firstname,))
-    rows = cur.fetchall()
-    if not rows:
-        rows = ("not found",)
-    con.close()
-    return rows
-"""
 
 def searchFirstname(input):
     con = sqlite3.connect("memberCGM.db")
@@ -232,14 +221,14 @@ def searchID(ID=""):
 
 def dataUpdate(id, Prefix="", Firstname="", Surname="", MiddleName="", ChurchPosition="", Department="", LocalCenter="",
                DoB="", Age="",  Gender="", Address="", City="", Region="", Country="", Nationality="", MaritalStatus="",
-               Education="", Mobile="", Telephone="", Email="", Occupation="", ChurchStatus="", Photo=""):
+               Education="", Mobile="", Telephone="", Email="", Occupation="", ChurchStatus="", Photo="", Has_synced=""):
     con = sqlite3.connect("memberCGM.db")
     cur = con.cursor()
     cur.execute("UPDATE memberCGM SET Prefix=?, Firstname=?, Surname=?, MiddleName=?, ChurchPosition=?, Department=?, LocalCenter=?,"
                 " DoB=?, Age=?,  Gender=?, Address=?, City=?, Region=?, Country=?, Nationality=?, MaritalStatus=?, Education=?,"
-                " Mobile=?, Telephone=?, Email=?, Occupation=?, ChurchStatus=?, Photo=? WHERE id=?", (Prefix, Firstname,
+                " Mobile=?, Telephone=?, Email=?, Occupation=?, ChurchStatus=?, Photo=?, Has_synced=? WHERE id=?", (Prefix, Firstname,
                  Surname, MiddleName, ChurchPosition, Department, LocalCenter, DoB, Age, Gender, Address, City, Region,
-                 Country, Nationality, MaritalStatus, Education, Mobile, Telephone, Email, Occupation, ChurchStatus, Photo, id))
+                 Country, Nationality, MaritalStatus, Education, Mobile, Telephone, Email, Occupation, ChurchStatus, Photo, Has_synced, id))
     con.commit()
     con.close()
 

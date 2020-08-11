@@ -4,16 +4,16 @@ def attendanceData():
     con = sqlite3.connect("attendanceCGM.db")
     cur = con.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS attendanceCGM (id INTEGER PRIMARY KEY, ServiceDate text, Males text, \
-                Females text, Children text, TotalAttendance text, NewMembers text, NewConverts text)")
+                Females text, Children text, TotalAttendance text, NewMembers text, NewConverts text, Has_synced text)")
     con.commit()
     con.close()
 
 
-def addAttendanceRec(ServiceDate, Males, Females, Children, TotalAttendance, NewMembers, NewConverts):
+def addAttendanceRec(ServiceDate, Males, Females, Children, TotalAttendance, NewMembers, NewConverts, Has_synced):
     con = sqlite3.connect("attendanceCGM.db")
     cur = con.cursor()
-    cur.execute("INSERT INTO attendanceCGM VALUES (NULL, ?,?,?,?,?,?,?)",
-                (ServiceDate, Males, Females, Children, TotalAttendance, NewMembers, NewConverts))
+    cur.execute("INSERT INTO attendanceCGM VALUES (NULL, ?,?,?,?,?,?,?,?)",
+                (ServiceDate, Males, Females, Children, TotalAttendance, NewMembers, NewConverts, Has_synced))
     con.commit()
     con.close()
 
@@ -35,12 +35,12 @@ def deleteRec(id):
     con.close()
 
 
-def dataUpdate(id, ServiceDate="", Males="", Females="", Children="", TotalAttendance="", NewMembers="", NewConverts=""):
+def dataUpdate(id, ServiceDate="", Males="", Females="", Children="", TotalAttendance="", NewMembers="", NewConverts="", Has_synced=""):
     con = sqlite3.connect("attendanceCGM.db")
     cur = con.cursor()
     cur.execute("UPDATE attendanceCGM SET ServiceDate=?, Males=?, Females=?, Children=?, TotalAttendance=?,"
-                "NewMembers=?,  NewConverts=? WHERE id=?",
-                (ServiceDate, Males, Females, Children, TotalAttendance, NewMembers, NewConverts, id))
+                "NewMembers=?,  NewConverts=?, Has_synced=? WHERE id=?",
+                (ServiceDate, Males, Females, Children, TotalAttendance, NewMembers, NewConverts, Has_synced, id))
     con.commit()
     con.close()
 
