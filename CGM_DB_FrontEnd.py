@@ -1,3 +1,10 @@
+"""
+Lines of codes to edit for various branches {necessary for unique ID on firebase}:
+in "Sync_DataOnline()":
+Search for all 'Tadi' and replace with 'Kum' (for Kumasi), 'Acc' (for Accra), 'Wamfie' (for Wamfie), ... etc
+"""
+
+
 import tkinter
 from tkinter import *
 import io
@@ -15,6 +22,9 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolb
 import matplotlib.pyplot as plt
 from matplotlib import dates as mpl_dates
 from matplotlib.dates import datetime as dt
+import pyrebase
+import requests  # for connection error
+import base64
 
 import CGM_DB_BackEnd
 import CGM_DB_Attendance_Backend
@@ -86,7 +96,7 @@ class Login:
         self.pass_icon = PhotoImage(file="pass_icon.png")
         self.logo_icon = PhotoImage(file="logo_icon.png")
 
-        lbl_background = Label(self.frame, text="welcome Holy Spirit", image=self.bg_icon, compound=CENTER).pack()
+        lbl_background = Label(self.frame, image=self.bg_icon).pack()
 
         login_frame = Frame(self.frame, bg="white")
         login_frame.place(x=get_width * 0.35, y=get_height * 0.16)
@@ -229,6 +239,211 @@ class Member:
             if iExit > 0:
                 root.quit()
                 return
+        def Sync_DataOnline():
+            try:
+                # Configuration for firebase
+                config = {
+
+                }
+
+                firebase = pyrebase.initialize_app(config)
+                storage = firebase.storage()  # [: if request.auth != null]...to be added to read and write rules in firebase storage
+
+                # Syncs member Database
+                memberDB = firebase.database()
+                memberDatabase = "memberDatabase"
+
+                try:
+                    # (Using realtime database)... Converts sqlite dB to NoSql on firebase dB
+                    overall_IDs = []
+                    paths = memberDB.child(memberDatabase).get()
+                    for path in paths.each():
+                        # print(path.key())
+                        overall_IDs.append(path.key())  # gets over all list of overall_IDs
+                        # print(path.val())
+
+                    #print(overall_IDs)
+                    branch_IDs = [i for i in overall_IDs if
+                                  i.startswith('Tadi')]  # picks only ID's of specific church branch
+                    #print(branch_IDs)
+
+                    local_IDs = []
+                    for row in CGM_DB_BackEnd.viewData():
+                        ID = "Tadi" + str(row[0])  # change ID's for kumasi:Kum, Accra:Acc, etc
+                        Has_synced = row[24]
+
+                        Photo_encoded = row[23]
+                        print(Photo_encoded)
+                        Photo = Photo_encoded.decode('utf-8')
+
+                        #print(Photo)
+
+                        local_IDs.append(ID)
+                        # print('Local ID list is:{}'.format(local_IDs))
+                        if ID in branch_IDs:
+                            if Has_synced == 'false':  # Data has been synced before but has been updated in local dB again
+                                data = {
+                                    "Prefix": row[1], "First name": row[2], "Last name": row[3], "Middle name": row[4],
+                                    "Position": row[5], "Department": row[6], "Local Center": row[7], "DoB": row[8],
+                                    "Age": row[9],
+                                    "Gender": row[10], "Address": row[11], "City": row[12], "Region": row[13],
+                                    "Country": row[14],
+                                    "Nationality": row[15], "Marital": row[16], "Education": row[17], "Mobile": row[18],
+                                    "Telephone": row[19], "Email": row[20], "Occupation": row[21],
+                                    "Status": row[22], "Photo": Photo}  # ,
+                                memberDB.child(memberDatabase).child(ID).set(data)
+                                Has_synced_updated = 'true'
+                                CGM_DB_BackEnd.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
+                                                          row[7], row[8],
+                                                          row[9], row[10], row[11], row[12], row[13], row[14], row[15],
+                                                          row[16], row[17], row[18], row[19],
+                                                          row[20], row[21], row[22], row[23], Has_synced_updated)
+                        else:  # New Data that has not been synced before
+                            """
+                            import base64
+
+                            with open("Exit_icon.jpg", "rb") as img_file:
+                                my_string = base64.b64encode(img_file.read())
+                                var_string = my_string.decode('utf-8')
+                            print(my_string)
+                            print(var_string)
+                            """
+                            Photo_encoded = row[23]
+                            Photo = Photo_encoded.decode('utf-8')
+                            data = {
+                                "Prefix": row[1], "First name": row[2], "Last name": row[3], "Middle name": row[4],
+                                "Position": row[5], "Department": row[6], "Local Center": row[7], "DoB": row[8],
+                                "Age": row[9],
+                                "Gender": row[10], "Address": row[11], "City": row[12], "Region": row[13],
+                                "Country": row[14],
+                                "Nationality": row[15], "Marital": row[16], "Education": row[17], "Mobile": row[18],
+                                "Telephone": row[19], "Email": row[20], "Occupation": row[21],
+                                "Status": row[22], "Photo": Photo}  # , "Photo": row[23]
+                            memberDB.child(memberDatabase).child(ID).set(data)
+                            Has_synced_updated = 'true'
+                            CGM_DB_BackEnd.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
+                                                      row[8],
+                                                      row[9], row[10], row[11], row[12], row[13], row[14], row[15],
+                                                      row[16], row[17], row[18], row[19],
+                                                      row[20], row[21], row[22], row[23], Has_synced_updated) # Updates local dB if data syncs online
+                    # print('Local ID list is:{}'.format(local_IDs))
+                    for item in branch_IDs:
+                        if item not in local_IDs:
+                            memberDB.child(memberDatabase).child(item).remove()
+                except TypeError:  # TypeError will be returned during first time syncing when 'branch_IDs' returns none. Hence needed for first time sync
+                    for row in CGM_DB_BackEnd.viewData():
+                        ID = "Tadi" + str(row[0])
+                        # Has_synced = row[24] # Has_synced will be false already before first sync
+
+                        Photo_encoded = row[23]
+                        Photo = Photo_encoded.decode('utf-8')
+
+                        #print(my_string)
+                        #print(my_string.decode('utf-8'))
+
+                        data = {
+                            "Prefix": row[1], "First name": row[2], "Last name": row[3], "Middle name": row[4],
+                            "Position": row[5], "Department": row[6], "Local Center": row[7], "DoB": row[8],
+                            "Age": row[9],
+                            "Gender": row[10], "Address": row[11], "City": row[12], "Region": row[13],
+                            "Country": row[14],
+                            "Nationality": row[15], "Marital": row[16], "Education": row[17], "Mobile": row[18],
+                            "Telephone": row[19], "Email": row[20], "Occupation": row[21],
+                            "Status": row[22], "Photo": Photo}  # , "Photo": row[23]
+                        memberDB.child(memberDatabase).child(ID).set(data)
+                        Has_synced_updated = 'true'
+                        CGM_DB_BackEnd.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
+                                                  row[8], row[9], row[10], row[11], row[12], row[13], row[14], row[15],
+                                                  row[16], row[17], row[18], row[19],
+                                                  row[20], row[21], row[22], row[23], Has_synced_updated)
+
+                # Syncs Attendance Database
+                attendanceDB = firebase.database()
+                attendanceDatabase = "attendanceDatabase"
+
+                """
+                # (Using cloud Storage)... Syncs local dB to cloud by uploading whole local file
+                path2_on_cloud = "attendanceDatabase/attendanceCGM.db"
+                path2_local = "attendanceCGM.db"
+                storage.child(path2_on_cloud).put(path2_local)  # uploads attendance DB file to firebase storage
+                # storage.child(path2_on_cloud).download("attendanceCGM.db")  # downloads attendance DB file from firebase to local
+                """
+
+                try:
+                    # (Using realtime database)... Converts sqlite dB to NoSql on firebase dB
+                    overall_IDsAtt = []
+                    paths = attendanceDB.child(attendanceDatabase).get()
+                    for path in paths.each():
+                        #print(path.key())
+                        overall_IDsAtt.append(path.key())   # gets over all list of overall_IDs
+                        #print(path.val())
+
+                    #print(overall_IDsAtt)
+                    branch_IDsAtt = [i for i in overall_IDsAtt if i.startswith('Tadi')]  # picks only ID's of specific church branch
+                    #print(branch_IDsAtt)
+
+                    local_IDsAtt = []
+                    for row in CGM_DB_Attendance_Backend.viewData():
+                        IDAtt = "Tadi" + str(row[0])  # change IDAtt for kumasi:Kum, Accra:Acc, etc
+                        Has_synced = row[8]
+
+                        local_IDsAtt.append(IDAtt)
+                        #print('Local IDAtt list is:{}'.format(local_IDs))
+                        if IDAtt in branch_IDsAtt:
+                            if Has_synced == 'false':  # Data has been synced before but has been updated in local dB again
+                                data = {
+                                    "1 Date": row[1],
+                                    "2 Males": row[2],
+                                    "3 Females": row[3],
+                                    "4 Children": row[4],
+                                    "5 Total": row[5],
+                                    "6 New members": row[6],
+                                    "7 New converts": row[7]
+                                }
+                                attendanceDB.child(attendanceDatabase).child(IDAtt).set(data)
+                                Has_synced_updated = 'true'
+                                CGM_DB_Attendance_Backend.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], Has_synced_updated)
+                        else:  # New Data that has not been synced before
+                            data = {
+                                "1 Date": row[1],
+                                "2 Males": row[2],
+                                "3 Females": row[3],
+                                "4 Children": row[4],
+                                "5 Total": row[5],
+                                "6 New members": row[6],
+                                "7 New converts": row[7]
+                            }
+                            attendanceDB.child(attendanceDatabase).child(IDAtt).set(data)
+                            Has_synced_updated = 'true'
+                            CGM_DB_Attendance_Backend.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
+                                                                 row[7], Has_synced_updated)
+                            #print('Local IDAtt list is:{}'.format(local_IDs))
+                    """
+                    # commented out because no delete function required in Attendance DB
+                    for item in branch_IDsAtt:
+                        if item not in local_IDsAtt:
+                            attendanceDB.child(attendanceDatabase).child(item).remove()
+                    """
+                except TypeError:   # TypeError will be returned during first time syncing when 'branch_IDs' returns none. Hence needed for first time sync
+                    for row in CGM_DB_Attendance_Backend.viewData():
+                        IDAtt = "Tadi" + str(row[0])  # change IDAtt for kumasi:Kum, Accra:Acc, etc
+                        #Has_synced = row[24] # Has_synced will be false already before first sync
+                        data = {
+                            "1 Date": row[1],
+                            "2 Males": row[2],
+                            "3 Females": row[3],
+                            "4 Children": row[4],
+                            "5 Total": row[5],
+                            "6 New members": row[6],
+                            "7 New converts": row[7]
+                        }
+                        attendanceDB.child(attendanceDatabase).child(IDAtt).set(data)
+                        Has_synced_updated = 'true'
+                        CGM_DB_Attendance_Backend.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
+                                                             row[7], Has_synced_updated)
+            except requests.exceptions.ConnectionError:
+                messagebox.showerror("CGM Database Management System", "Data cannot be synced.\nPlease check your internet connection and Try again.", parent=root)
+
 
         # de-highlights combo boxes
         def defocus(event):
@@ -280,8 +495,12 @@ class Member:
                         byte_io = io.BytesIO()
                         my_photo_resized.save(byte_io, format='PNG')
                         byte_io = byte_io.getvalue()
-                        Photo = byte_io
+                        Photo_decode = byte_io  # gets io byte string from image file
                         paths.append(filename)
+                        Photo = base64.b64encode(Photo_decode)  # converts io string into base64 byte string
+                        #print(Photo)
+                        #new = Photo.decode('utf-8')
+                        #print('new one is:'+ new)
                         # print(paths)
                     else:
                         # print('New filename received')
@@ -290,7 +509,7 @@ class Member:
                 except NameError:
                     with open('Null_Image.jpg', 'rb') as newfile:
                         Photo = newfile.read()
-
+                Has_synced = 'false'
                 CGM_DB_BackEnd.addMemberRec(Prefix.get().upper(), Firstname.get().upper(), Surname.get().upper(),
                                             MiddleName.get().upper(), ChurchPosition.get().upper(),
                                             Department.get().upper(), LocalCenter.get().upper(), DoB.get(), Age.get(),
@@ -299,7 +518,7 @@ class Member:
                                             Country.get().upper(), Nationality.get().upper(),
                                             MaritalStatus.get().upper(), Education.get().upper(), Mobile.get(),
                                             Telephone.get(), Email.get(),
-                                            Occupation.get().upper(), ChurchStatus.get().upper(), Photo)
+                                            Occupation.get().upper(), ChurchStatus.get().upper(), Photo, Has_synced)
 
                 clearDisplay()
                 result = '\nPrefix : {} \nFirst Name : {} \nSurname : {} \nMiddle Name : {} \nPosition : {} \nDepartment : {} ' \
@@ -354,7 +573,7 @@ class Member:
                         lbl_DepartmentTopValue.configure(text=row[6])
                         lbl_LocalCenterTopValue.configure(text=row[7])
                         it = row[23]
-                        img = ImageTk.PhotoImage(data=it)
+                        img = PhotoImage(data=it) #ImageTk.
                         photo_labelTop.configure(image=img)
                         photo_labelTop.image = img
 
@@ -385,7 +604,7 @@ class Member:
                         ChurchStatus.set(row[22])
                         global it  # required to recall (reuse of image) during update function
                         it = row[23]
-                        img = ImageTk.PhotoImage(data=it)
+                        img = PhotoImage(data=it) #ImageTk.
                         photo_label.configure(image=img)
                         photo_label.image = img
                         Top.destroy()
@@ -470,25 +689,15 @@ class Member:
                             byte_io = io.BytesIO()
                             my_photo_resized.save(byte_io, format='PNG')
                             byte_io = byte_io.getvalue()
-                            Photo = byte_io
+                            Photo_decode = byte_io
                             paths.append(filename)
-                            # print(paths)
+                            Photo = base64.b64encode(Photo_decode)
+                            #print(Photo)
                         else:
                             Photo = it  # gets the photo (downloaded from DB) and resends to DB if no new photo is loaded
                     except NameError:
                         Photo = it  # gets the photo (downloaded from DB) and resends to DB if no new photo is loaded
-                    """
-                    try:
-                        if filename:
-                            byte_io = io.BytesIO()
-                            my_photo_resized.save(byte_io, format='PNG')
-                            byte_io = byte_io.getvalue()
-                            Photo = byte_io
-
-                    except NameError:
-                        Photo = it  # gets the photo (downloaded from DB) and resends to DB if no new photo is loaded
-
-                    """
+                    Has_synced = 'false'
                     CGM_DB_BackEnd.dataUpdate(var_ID, Prefix.get().upper(), Firstname.get().upper(),
                                               Surname.get().upper(), MiddleName.get().upper(),
                                               ChurchPosition.get().upper(),
@@ -498,7 +707,7 @@ class Member:
                                               Country.get().upper(), Nationality.get().upper(),
                                               MaritalStatus.get().upper(), Education.get().upper(), Mobile.get(),
                                               Telephone.get(), Email.get(),
-                                              Occupation.get().upper(), ChurchStatus.get().upper(), Photo)
+                                              Occupation.get().upper(), ChurchStatus.get().upper(), Photo, Has_synced)
                     clearDisplay()
                     result = '\nPrefix : {} \nFirst Name : {} \nSurname : {} \nMiddle Name : {} \nPosition : {} \nDepartment : {} ' \
                              '\nLocalCenter : {} \nDoB : {} \nAge : {} \nGender : {} \nAddress : {} \nCity : {} \nRegion : {}' \
@@ -540,6 +749,7 @@ class Member:
         def veiw_all():
             delete_TreeviewItems()
             for row in CGM_DB_BackEnd.viewData():
+                #print(row)  # to be deleted later
                 tree.insert("", END, values=row)  # tk.END if it doesn't work
 
         # deletes items in Tree view prior to pasting search result in
@@ -617,6 +827,7 @@ class Member:
         def clearSearch():
             search_combo.current(0)
             entry_searchItem.delete(0, END)
+            #my_notebook.select(0)...just for test ...to be deleted
 
         def clearResult():
             delete_TreeviewItems()
@@ -630,7 +841,7 @@ class Member:
                     del_selected_item = tree.set(selected_item, '#1')
                     CGM_DB_BackEnd.deleteRec(del_selected_item)
                     tree.delete(tree.selection())
-                    print (del_selected_item)
+                    #print (del_selected_item)
                 else:
                     return None
             except IndexError:
@@ -649,7 +860,7 @@ class Member:
                                      'Occupation', 'Status'])
                     for row_id in tree.get_children():
                         row1 = tree.item(row_id)['values'][:23]  # photo is omitted when exporting to csv file
-                        print(row1)
+                        #print(row1)
                         writer.writerow(row1)
                     messagebox.showinfo("CGM Database Management System", '"File Exported As {} on to Desktop"'.format(filename1),
                                         parent=Top_export)
@@ -694,7 +905,7 @@ class Member:
                                    font=('arial', 20, 'bold'), text="Member Info\n", width=get_width*0.87, height=get_height*0.77)  # width=1000, height=700,
         DataFrameLEFT.grid(row=0, column=0, padx=18, pady=(0, 8)) #, sticky=W)
         for index in range(6):
-            DataFrameLEFT.grid_columnconfigure(index, weight=1)
+            DataFrameLEFT.grid_columnconfigure(index, weight=1)  # spaces columns well
         DataFrameLEFT.grid_propagate(False)
         DataFrameLEFT.pack_propagate(False)
 
@@ -911,12 +1122,18 @@ class Member:
                                       bd=4, bg='#03A9F4', command=clearDisplay, cursor='hand2')
         self.btnClearDisplay.grid(row=10, column=3, pady=15)
 
+        # Sync Data Button
+        self.sync_icon = ImageTk.PhotoImage(Image.open("sync_icon.jpg"))
+        #sync_icon = PhotoImage("sync_icon.jpg")
+        self.button_Sync = Button(my_notebook, text="Sync Data Online", image=self.sync_icon, compound=RIGHT, font=('arial', 11), wraplength=130,
+                             height=100, width=177, command=Sync_DataOnline)
+        self.button_Sync.place(x=2, y=320)
+
         # exit Button
         exit_image = ImageTk.PhotoImage(Image.open("Exit_icon.jpg"))
-        self.btnExit = Button(my_notebook, image=exit_image, height=100, width=173, command=iExit, cursor='hand2') # changed width from 176
+        self.btnExit = Button(my_notebook, image=exit_image, height=100, width=177, command=iExit) # changed width from 176
         self.btnExit.image = exit_image
-        self.btnExit.place(x=0, y=317)
-
+        self.btnExit.place(x=2, y=428)
         # ============================ VIEW TAB ============================================================
 
         # ===========View Tab Frames===============
@@ -1063,11 +1280,11 @@ class Member:
                 # #### ADD IF STATEMENTS TO CHECK IF ANY ENTRY IS NOT A NUMBER / DIGIT   ######
                 if Males.get().isnumeric() and Females.get().isnumeric() and Children.get().isnumeric() and \
                         TotalAttendance.get().isnumeric() and NewMembers.get().isnumeric() and NewConverts.get().isnumeric():
-
+                    Has_synced = 'false'
                     CGM_DB_Attendance_Backend.addAttendanceRec(ServiceDate.get(), Males.get(), Females.get(),
                                                                Children.get(),
                                                                TotalAttendance.get(), NewMembers.get(),
-                                                               NewConverts.get())
+                                                               NewConverts.get(), Has_synced)
                     dummy = ''
                     result2 = [dummy, ServiceDate.get(), Males.get(), Females.get(), Children.get(),
                                TotalAttendance.get(),
@@ -1116,10 +1333,10 @@ class Member:
                       and len(TotalAttendance.get()) and len(NewMembers.get()) and len(NewConverts.get()) != 0):
                     if Males.get().isnumeric() and Females.get().isnumeric() and Children.get().isnumeric() and \
                             TotalAttendance.get().isnumeric() and NewMembers.get().isnumeric() and NewConverts.get().isnumeric():
-
+                        Has_synced = 'false'
                         CGM_DB_Attendance_Backend.dataUpdate(Attendance_ListNo, ServiceDate.get(), Males.get(),
                                                              Females.get(), Children.get(), TotalAttendance.get(),
-                                                             NewMembers.get(), NewConverts.get())
+                                                             NewMembers.get(), NewConverts.get(), Has_synced)
                         result2 = [Attendance_ListNo, ServiceDate.get(), Males.get(), Females.get(), Children.get(),
                                    TotalAttendance.get(),
                                    NewMembers.get(), NewConverts.get()]
@@ -1215,30 +1432,32 @@ class Member:
 
         # =================== frames for attendance page======================
 
-        Attendance_MainFrame = Frame(attendance_tab, bd=1, padx=20, pady=20, relief=RIDGE, bg="Hotpink4", width=get_width*0.87, height=get_height*0.77)
+        Attendance_MainFrame = Frame(attendance_tab, padx=20, pady=20, relief=RIDGE, bg="Hotpink4", width=get_width*0.87, height=get_height*0.77)
         Attendance_MainFrame.grid()   # pack()  # side=BOTTOM)  width=1300, height=800,  expand=True, fill=BOTH,
 
-        Attendance_DataFrame = LabelFrame(Attendance_MainFrame, bd=1, padx=10, pady=10, bg="Ghost white", relief=RIDGE,
+        Attendance_DataFrame = LabelFrame(Attendance_MainFrame, padx=10, pady=10, bg="Ghost white", relief=RIDGE,
                                           font=('arial', 20, 'bold'), text="Attendance\n", width=get_width*0.87, height=get_height*0.77)  # width=1000, height=800,
         Attendance_DataFrame.grid(row=0, column=0, padx=18, pady=5) #, sticky=W)  # , expand=True, fill=BOTH
         Attendance_DataFrame.grid_columnconfigure(1, weight=1)
         Attendance_DataFrame.grid_propagate(False)
         Attendance_DataFrame.pack_propagate(False)
 
-        Attendance_DataFrame_Left = LabelFrame(Attendance_DataFrame, bd=1, padx=10, pady=10, bg="Ghost white",
-                                               relief=RIDGE)  # width=1000, height=800,
-        Attendance_DataFrame_Left.pack(side=LEFT, anchor=N, padx=(12, 0))  # fill=BOTH, expand=True,
+        Attendance_DataFrame_Left = Frame(Attendance_DataFrame, padx=10, pady=10, bg="Ghost white")  # width=1000, height=800,
+        Attendance_DataFrame_Left.pack(side=LEFT, anchor=N) # padx=(12, 0))  # fill=BOTH, expand=True,
 
-        Attendance_DataFrame_Right = Frame(Attendance_DataFrame, bd=1, padx=10, pady=10, bg="Ghost white",
-                                           relief=RIDGE)  # width=1000, height=800,
+        Attendance_DataFrame_Left_T = Frame(Attendance_DataFrame_Left, padx=10, pady=10, bg="Ghost white")  # width=1000, height=800,
+        Attendance_DataFrame_Left_T.pack(side=TOP, padx=(12, 0))  # fill=BOTH, expand=True,
+
+        Attendance_DataFrame_Left_B = Frame(Attendance_DataFrame_Left, padx=10, pady=10, bg="Ghost white")  # width=1000, height=800,
+        Attendance_DataFrame_Left_B.pack(side=BOTTOM, padx=(12, 0))  # fill=BOTH, expand=True,
+
+        Attendance_DataFrame_Right = Frame(Attendance_DataFrame, padx=10, pady=10, bg="Ghost white")  # width=1000, height=800,
         Attendance_DataFrame_Right.pack(side=RIGHT, anchor=N)  # fill=BOTH, expand=True,
 
-        Attendance_DataFrame_Right_T = Frame(Attendance_DataFrame_Right, padx=10, pady=10, bg="Ghost white",
-                                             relief=RIDGE)  # width=1000, height=800,
+        Attendance_DataFrame_Right_T = Frame(Attendance_DataFrame_Right, padx=10, pady=10, bg="Ghost white")  # width=1000, height=800,
         Attendance_DataFrame_Right_T.pack(side=TOP)  # fill=BOTH, expand=True,
 
-        Attendance_DataFrame_Right_B = Frame(Attendance_DataFrame_Right, padx=10, pady=10, bg="Ghost white",
-                                             relief=RIDGE)  # width=1000, height=800,
+        Attendance_DataFrame_Right_B = Frame(Attendance_DataFrame_Right, padx=10, pady=10, bg="Ghost white")  # width=1000, height=800,
         Attendance_DataFrame_Right_B.pack(side=BOTTOM, pady=(10, 33))  # fill=BOTH, expand=True,
 
         # ==================================================
@@ -1252,73 +1471,73 @@ class Member:
         NewConverts = StringVar()
 
         # ===================Labels and Entries of Attendance page ============
-        lbl_ServiceDate = Label(Attendance_DataFrame_Left, font=('arial', 13), text="Date of service:", padx=2, pady=2,
+        lbl_ServiceDate = Label(Attendance_DataFrame_Left_T, font=('arial', 13), text="Date of service:", padx=2, pady=2,
                                 bg="Ghost White")
         lbl_ServiceDate.grid(row=0, column=0, padx=(10, 0), pady=20, sticky=W)
         today = date.today()
-        S_date = DateEntry(Attendance_DataFrame_Left, font=('arial', 15), width=12, textvariable=ServiceDate,
+        S_date = DateEntry(Attendance_DataFrame_Left_T, font=('arial', 15), width=12, textvariable=ServiceDate,
                            locale='en_US',
                            date_pattern='dd/mm/yyyy', maxdate=today, background='darkblue', foreground='white',
                            borderwidth=2)
         S_date.grid(row=0, column=1, padx=10, pady=5)
         # S_date.bind("<FocusIn>", defocus)
 
-        lbl_Males = Label(Attendance_DataFrame_Left, font=('arial', 13), text="No. of Males:", padx=2, pady=2,
+        lbl_Males = Label(Attendance_DataFrame_Left_T, font=('arial', 13), text="No. of Males:", padx=2, pady=2,
                           bg="Ghost White")
         lbl_Males.grid(row=1, column=0, padx=(10, 0), pady=20, sticky=W)
-        txt_Males = Entry(Attendance_DataFrame_Left, font=('arial', 15), textvariable=Males, width=14)
+        txt_Males = Entry(Attendance_DataFrame_Left_T, font=('arial', 15), textvariable=Males, width=14)
         txt_Males.grid(row=1, column=1, pady=5)
 
-        lbl_Females = Label(Attendance_DataFrame_Left, font=('arial', 13), text="No. of Females:", padx=2, pady=2,
+        lbl_Females = Label(Attendance_DataFrame_Left_T, font=('arial', 13), text="No. of Females:", padx=2, pady=2,
                             bg="Ghost White")
         lbl_Females.grid(row=2, column=0, padx=(10, 0), pady=20, sticky=W)
-        txt_Females = Entry(Attendance_DataFrame_Left, font=('arial', 15), textvariable=Females, width=14)
+        txt_Females = Entry(Attendance_DataFrame_Left_T, font=('arial', 15), textvariable=Females, width=14)
         txt_Females.grid(row=2, column=1, pady=5)
 
-        lbl_Children = Label(Attendance_DataFrame_Left, font=('arial', 13), text="No. of Children:", padx=2, pady=2,
+        lbl_Children = Label(Attendance_DataFrame_Left_T, font=('arial', 13), text="No. of Children:", padx=2, pady=2,
                              bg="Ghost White")
         lbl_Children.grid(row=3, column=0, padx=(10, 0), pady=20, sticky=W)
-        txt_Children = Entry(Attendance_DataFrame_Left, font=('arial', 15), textvariable=Children, width=14)
+        txt_Children = Entry(Attendance_DataFrame_Left_T, font=('arial', 15), textvariable=Children, width=14)
         txt_Children.grid(row=3, column=1, pady=5)
 
-        lbl_TotalAttendance = Label(Attendance_DataFrame_Left, font=('arial', 13), text="Total Attendance:", padx=2,
+        lbl_TotalAttendance = Label(Attendance_DataFrame_Left_T, font=('arial', 13), text="Total Attendance:", padx=2,
                                     pady=2,
                                     bg="Ghost White")
         lbl_TotalAttendance.grid(row=4, column=0, padx=(10, 0), pady=20, sticky=W)
-        txt_TotalAttendance = Entry(Attendance_DataFrame_Left, font=('arial', 15), textvariable=TotalAttendance,
+        txt_TotalAttendance = Entry(Attendance_DataFrame_Left_T, font=('arial', 15), textvariable=TotalAttendance,
                                     width=14)
         txt_TotalAttendance.grid(row=4, column=1, pady=5)
 
-        lbl_NewMembers = Label(Attendance_DataFrame_Left, font=('arial', 13), text="No. of New Members:", padx=2,
+        lbl_NewMembers = Label(Attendance_DataFrame_Left_T, font=('arial', 13), text="No. of New Members:", padx=2,
                                pady=2,
                                bg="Ghost White")
         lbl_NewMembers.grid(row=0, column=2, padx=(20, 0), pady=20, sticky=W)
-        txt_NewMembers = Entry(Attendance_DataFrame_Left, font=('arial', 15), textvariable=NewMembers, width=14)
+        txt_NewMembers = Entry(Attendance_DataFrame_Left_T, font=('arial', 15), textvariable=NewMembers, width=14)
         txt_NewMembers.grid(row=0, column=3, padx=20, pady=5)
 
-        lbl_NewConverts = Label(Attendance_DataFrame_Left, font=('arial', 13), text="No. of New Converts:", padx=2,
+        lbl_NewConverts = Label(Attendance_DataFrame_Left_T, font=('arial', 13), text="No. of New Converts:", padx=2,
                                 pady=2,
                                 bg="Ghost White")
         lbl_NewConverts.grid(row=1, column=2, padx=(20, 0), pady=20, sticky=W)
-        txt_NewConverts = Entry(Attendance_DataFrame_Left, font=('arial', 15), textvariable=NewConverts, width=14)
+        txt_NewConverts = Entry(Attendance_DataFrame_Left_T, font=('arial', 15), textvariable=NewConverts, width=14)
         txt_NewConverts.grid(row=1, column=3, padx=20, pady=5)
 
         # =============== Attendance page Buttons ======================
         # left frame buttons
-        btnClearEntry_Att = Button(Attendance_DataFrame_Left, text="Clear Entry", font=('arial', 12, 'bold'), height=1,
+        btnClearEntry_Att = Button(Attendance_DataFrame_Left_T, text="Clear Entry", font=('arial', 12, 'bold'), height=1,
                                    width=9,
                                    bd=4, bg='#03A9F4', command=ClearEntry_Att, cursor='hand2')
         btnClearEntry_Att.grid(row=6, column=0, pady=50)
 
-        btnSubmit_Att = Button(Attendance_DataFrame_Left, text="Submit", font=('arial', 12, 'bold'), height=1, width=9,
+        btnSubmit_Att = Button(Attendance_DataFrame_Left_T, text="Submit", font=('arial', 12, 'bold'), height=1, width=9,
                                bd=4, bg='#03A9F4', command=Submit_Att, cursor='hand2')
         btnSubmit_Att.grid(row=6, column=1, pady=50)
 
-        btnEdit_Att = Button(Attendance_DataFrame_Left, text="Edit", font=('arial', 12, 'bold'), height=1, width=9,
+        btnEdit_Att = Button(Attendance_DataFrame_Left_T, text="Edit", font=('arial', 12, 'bold'), height=1, width=9,
                              bd=4, bg='#03A9F4', command=Edit_Att, cursor='hand2')
         btnEdit_Att.grid(row=6, column=2, pady=50)
 
-        btnUpdate_Att = Button(Attendance_DataFrame_Left, text="Update", font=('arial', 12, 'bold'), height=1, width=9,
+        btnUpdate_Att = Button(Attendance_DataFrame_Left_T, text="Update", font=('arial', 12, 'bold'), height=1, width=9,
                                bd=4, bg='#03A9F4', command=Update_Att, cursor='hand2')
         btnUpdate_Att.grid(row=6, column=3, pady=50)
 
