@@ -26,6 +26,7 @@ import pyrebase
 import requests  # for connection error
 import base64
 
+
 import CGM_DB_BackEnd
 import CGM_DB_Attendance_Backend
 
@@ -214,9 +215,9 @@ class Member:
         ChurchStatus = StringVar()
 
         # lists for Combo boxes with longer list of options
-        Regions = ["Select Region", "Western", "Western-North", "Greater Accra", "Ashanti", "Brong Ahafo",
-                   "Bono-East", "Ahafo", "Central", "Eastern", "Northern", "Savannah", "North East",
-                   "Upper East", "Upper West", "Volta", "Oti", "N/A"]
+        Regions = ["Select Region", "Ahafo", "Ashanti", "Bono-East", "Brong Ahafo", "Central",
+                   "Eastern", "Greater Accra", "North East", "Northern", "Oti", "Savannah", "Upper East",
+                   "Upper West", "Volta", "Western", "Western-North", "N/A"]
 
         Positions = ["Select Position", "Apostle", "Reverend", "Minister", "Elder", "Deacon",
                      "Lady Deacon", "Shepherd", "Ass. Shepherd", "member"]
@@ -224,9 +225,9 @@ class Member:
         Departments = ["Select Department", "Blessed Choir", "Technical", "Ushering",
                        "Protocol", "Hospitality", "Children's Dept", "N/A"]
 
-        LocalCenters = ["Select Local Center", "Whindo", "Assakae", "Lagos town", "Kwesimitsim - zongo",
-                        "Kwesimitsim - main", "Anaji", "Takoradi - Number 2", "Takoradi -main", "Kweikuma", "Sekondi",
-                        "Bakaekyir", "Mempeasem", "Mpintsin", "Accra", "Kumasi", "Wemfie", "N/A"]
+        LocalCenters = ["Select Local Center", "Anaji", "Apollo", "Assakae",
+                        "Bakaekyir", "Kweikuma", "Kwesimintsim - main", "Kwesiminstim - zongo", "Lagos town", "Mempeasem",
+                        "Mpintsin", "Sekondi", "Takoradi - Harbor", "Takoradi - number 2", "Accra", "Kumasi", "Wemfie", "N/A"]
 
         Education_levels = ["Select Education Level", "Basic", "Junior High", "Senior High", "Bachelors", "Masters",
                             "PhD", "Post-Doc", "Other"]
@@ -241,13 +242,22 @@ class Member:
                 return
         def Sync_DataOnline():
             try:
+                config_list = []
                 # Configuration for firebase
-                config = {
 
+                config = {
+                    "apiKey": "AIzaSyAFoAXhsAUVQ0p72EIppjMVDwZJuigldpE",
+                    "authDomain": "cgm-database.firebaseapp.com",
+                    "databaseURL": "https://cgm-database.firebaseio.com",
+                    "projectId": "cgm-database",
+                    "storageBucket": "cgm-database.appspot.com",
+                    "sagingSenderId": "579778847597",
+                    "Id": "1:579778847597:web:a5c20471d3230095403064",
+                    "surementId": "G-BK3FR3N448"
                 }
 
                 firebase = pyrebase.initialize_app(config)
-                storage = firebase.storage()  # [: if request.auth != null]...to be added to read and write rules in firebase storage
+                #storage = firebase.storage()  # [: if request.auth != null]...to be added to read and write rules in firebase storage
 
                 # Syncs member Database
                 memberDB = firebase.database()
@@ -272,12 +282,13 @@ class Member:
                         ID = "Tadi" + str(row[0])  # change ID's for kumasi:Kum, Accra:Acc, etc
                         Has_synced = row[24]
 
+                        """
                         Photo_encoded = row[23]
                         print(Photo_encoded)
                         Photo = Photo_encoded.decode('utf-8')
-
+                        
                         #print(Photo)
-
+                        """
                         local_IDs.append(ID)
                         # print('Local ID list is:{}'.format(local_IDs))
                         if ID in branch_IDs:
@@ -290,7 +301,7 @@ class Member:
                                     "Country": row[14],
                                     "Nationality": row[15], "Marital": row[16], "Education": row[17], "Mobile": row[18],
                                     "Telephone": row[19], "Email": row[20], "Occupation": row[21],
-                                    "Status": row[22], "Photo": Photo}  # ,
+                                    "Status": row[22]}  #, "Photo": Photo}
                                 memberDB.child(memberDatabase).child(ID).set(data)
                                 Has_synced_updated = 'true'
                                 CGM_DB_BackEnd.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
@@ -300,16 +311,9 @@ class Member:
                                                           row[20], row[21], row[22], row[23], Has_synced_updated)
                         else:  # New Data that has not been synced before
                             """
-                            import base64
-
-                            with open("Exit_icon.jpg", "rb") as img_file:
-                                my_string = base64.b64encode(img_file.read())
-                                var_string = my_string.decode('utf-8')
-                            print(my_string)
-                            print(var_string)
-                            """
                             Photo_encoded = row[23]
                             Photo = Photo_encoded.decode('utf-8')
+                            """
                             data = {
                                 "Prefix": row[1], "First name": row[2], "Last name": row[3], "Middle name": row[4],
                                 "Position": row[5], "Department": row[6], "Local Center": row[7], "DoB": row[8],
@@ -318,7 +322,8 @@ class Member:
                                 "Country": row[14],
                                 "Nationality": row[15], "Marital": row[16], "Education": row[17], "Mobile": row[18],
                                 "Telephone": row[19], "Email": row[20], "Occupation": row[21],
-                                "Status": row[22], "Photo": Photo}  # , "Photo": row[23]
+                                "Status": row[22]}  # , "Photo": Photo}
+
                             memberDB.child(memberDatabase).child(ID).set(data)
                             Has_synced_updated = 'true'
                             CGM_DB_BackEnd.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
@@ -327,19 +332,20 @@ class Member:
                                                       row[16], row[17], row[18], row[19],
                                                       row[20], row[21], row[22], row[23], Has_synced_updated) # Updates local dB if data syncs online
                     # print('Local ID list is:{}'.format(local_IDs))
+                    """  # Delete function is commented out to avoid total deletion of all data from firebase when a 
+                         # user re-installs app for any reason(ie. with new local dB data)
                     for item in branch_IDs:
                         if item not in local_IDs:
                             memberDB.child(memberDatabase).child(item).remove()
+                    """
                 except TypeError:  # TypeError will be returned during first time syncing when 'branch_IDs' returns none. Hence needed for first time sync
                     for row in CGM_DB_BackEnd.viewData():
                         ID = "Tadi" + str(row[0])
                         # Has_synced = row[24] # Has_synced will be false already before first sync
-
+                        """
                         Photo_encoded = row[23]
                         Photo = Photo_encoded.decode('utf-8')
-
-                        #print(my_string)
-                        #print(my_string.decode('utf-8'))
+                        """
 
                         data = {
                             "Prefix": row[1], "First name": row[2], "Last name": row[3], "Middle name": row[4],
@@ -349,7 +355,7 @@ class Member:
                             "Country": row[14],
                             "Nationality": row[15], "Marital": row[16], "Education": row[17], "Mobile": row[18],
                             "Telephone": row[19], "Email": row[20], "Occupation": row[21],
-                            "Status": row[22], "Photo": Photo}  # , "Photo": row[23]
+                            "Status": row[22]}  # , "Photo": Photo}
                         memberDB.child(memberDatabase).child(ID).set(data)
                         Has_synced_updated = 'true'
                         CGM_DB_BackEnd.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7],
@@ -357,17 +363,17 @@ class Member:
                                                   row[16], row[17], row[18], row[19],
                                                   row[20], row[21], row[22], row[23], Has_synced_updated)
 
+                """
+                # (Using cloud Storage)... Syncs local dB to cloud by uploading whole local file
+                path_on_cloud = "memberDatabase/memberCGM.db"
+                path_local = "memberCGM.db"
+                storage.child(path_on_cloud).put(path_local)  # uploads attendance DB file to firebase storage
+                # storage.child(path2_on_cloud).download("attendanceCGM.db")  # downloads attendance DB file from firebase to local
+                """
+
                 # Syncs Attendance Database
                 attendanceDB = firebase.database()
                 attendanceDatabase = "attendanceDatabase"
-
-                """
-                # (Using cloud Storage)... Syncs local dB to cloud by uploading whole local file
-                path2_on_cloud = "attendanceDatabase/attendanceCGM.db"
-                path2_local = "attendanceCGM.db"
-                storage.child(path2_on_cloud).put(path2_local)  # uploads attendance DB file to firebase storage
-                # storage.child(path2_on_cloud).download("attendanceCGM.db")  # downloads attendance DB file from firebase to local
-                """
 
                 try:
                     # (Using realtime database)... Converts sqlite dB to NoSql on firebase dB
@@ -441,8 +447,17 @@ class Member:
                         Has_synced_updated = 'true'
                         CGM_DB_Attendance_Backend.dataUpdate(row[0], row[1], row[2], row[3], row[4], row[5], row[6],
                                                              row[7], Has_synced_updated)
+                """
+                # (Using cloud Storage)... Syncs local dB to cloud by uploading whole local file
+                path2_on_cloud = "attendanceDatabase/attendanceCGM.db"
+                path2_local = "attendanceCGM.db"
+                storage.child(path2_on_cloud).put(path2_local)  # uploads attendance DB file to firebase storage
+                # storage.child(path2_on_cloud).download("attendanceCGM.db")  # downloads attendance DB file from firebase to local
+                """
+
             except requests.exceptions.ConnectionError:
                 messagebox.showerror("CGM Database Management System", "Data cannot be synced.\nPlease check your internet connection and Try again.", parent=root)
+
 
 
         # de-highlights combo boxes
@@ -485,13 +500,13 @@ class Member:
         global paths
         paths = []  # required to save various file paths in a list to prevent using same image for the next user data
 
-        # for add New button
+        # for add New function to be called in Save function
         def addNew():
             if (len(Firstname.get()) and len(Surname.get()) and len(Department.get()) and len(
                     Mobile.get()) != 0):  # add last name and other important values before it allows saving to DB
                 try:
                     if filename not in paths:
-                        # print(filename)
+                        print(filename)
                         byte_io = io.BytesIO()
                         my_photo_resized.save(byte_io, format='PNG')
                         byte_io = byte_io.getvalue()
@@ -504,11 +519,24 @@ class Member:
                         # print(paths)
                     else:
                         # print('New filename received')
-                        with open('Null_Image.jpg', 'rb') as newfile:
-                            Photo = newfile.read()
+                        null_photo = Image.open('Null_Image.jpg')
+                        byte_io = io.BytesIO()
+                        null_photo.save(byte_io, format='PNG')
+                        byte_io = byte_io.getvalue()
+                        Photo_decode = byte_io  # gets io byte string from image file
+                        Photo = base64.b64encode(Photo_decode)
+                        #with open('Null_Image.jpg', 'rb') as newfile:
+                         #   Photo = base64.b64encode(newfile.read())
+
                 except NameError:
-                    with open('Null_Image.jpg', 'rb') as newfile:
-                        Photo = newfile.read()
+                    null_photo = Image.open('Null_Image.jpg')
+                    byte_io = io.BytesIO()
+                    null_photo.save(byte_io, format='PNG')
+                    byte_io = byte_io.getvalue()
+                    Photo_decode = byte_io  # gets io byte string from image file
+                    Photo = base64.b64encode(Photo_decode)
+                    #with open('Null_Image.jpg', 'rb') as newfile:
+                     #   Photo = base64.b64encode(newfile.read())
                 Has_synced = 'false'
                 CGM_DB_BackEnd.addMemberRec(Prefix.get().upper(), Firstname.get().upper(), Surname.get().upper(),
                                             MiddleName.get().upper(), ChurchPosition.get().upper(),
@@ -546,134 +574,10 @@ class Member:
 
                 display_result.insert(END, result)
                 clearData()
-                messagebox.showinfo("CGM Database Management System", "Submitted to Database", parent=root)
+                messagebox.showinfo("CGM Database Management System", "Submitted successfully to Database", parent=root)
             else:
-                messagebox.showinfo("CGM Database Management System", "Please fill all data !!!", parent=root)
+                messagebox.showinfo("CGM Database Management System", "Please fill all required data !!!\n(Name, Position, Department, Local center, Mobile)", parent=root)
 
-        # pop up for Update function in Home Tab
-        def edit_popup():
-            Top = Toplevel(root)
-            Top.title("CGM Database Management System")
-            Top.geometry("700x500+1200+200")
-            Top.configure(bg="gainsboro")
-            Top.grab_set()  # avoids multiple instances of the toplevel window
-            Top.resizable(0, 0)  # removes the maximize button
-
-            def fetchID():
-                for row in CGM_DB_BackEnd.searchID(ID.get()):
-                    if str(row) == 'not found':
-                        messagebox.showinfo("CGM Database Management System",
-                                            "This Member ID doesn't exist in Records !!!", parent=Top)
-                    else:
-                        # print(row)
-                        global var_ID  # useful for query of edit_profile function
-                        var_ID = row[0]
-                        lbl_nameTopValue.configure(text=row[2] + ' ' + row[4] + ' ' + row[3])
-                        lbl_PositionTopValue.configure(text=row[5])
-                        lbl_DepartmentTopValue.configure(text=row[6])
-                        lbl_LocalCenterTopValue.configure(text=row[7])
-                        it = row[23]
-                        img = PhotoImage(data=it) #ImageTk.
-                        photo_labelTop.configure(image=img)
-                        photo_labelTop.image = img
-
-            def edit_profile():
-                try:
-                    for row in CGM_DB_BackEnd.searchID(var_ID):
-                        self.Prefix_combo.set(row[1])
-                        Firstname.set(row[2])
-                        Surname.set(row[3])
-                        MiddleName.set(row[4])
-                        self.Position_combo.set(row[5])
-                        self.Department_combo.set(row[6])
-                        self.L_Center_combo.set(row[7])
-                        DoB.set(row[8])
-                        Age.set(row[9])
-                        self.Gender_combo.set(row[10])
-                        Res_Address.set(row[11])
-                        City.set(row[12])
-                        self.Region_combo.set(row[13])
-                        Country.set(row[14])
-                        Nationality.set(row[15])
-                        self.M_Status_combo.set(row[16])
-                        self.Education_combo.set(row[17])
-                        Mobile.set(row[18])
-                        Telephone.set((row[19]))
-                        Email.set(row[20])
-                        Occupation.set(row[21])
-                        ChurchStatus.set(row[22])
-                        global it  # required to recall (reuse of image) during update function
-                        it = row[23]
-                        img = PhotoImage(data=it) #ImageTk.
-                        photo_label.configure(image=img)
-                        photo_label.image = img
-                        Top.destroy()
-                    # print(row)
-                except NameError:
-                    messagebox.showerror("CGM Database Management System", "No ID was fetched !!!", parent=Top)
-
-            frame_EnterID = Frame(Top, padx=10, pady=10, bg="gainsboro", relief=RIDGE)
-            frame_EnterID.grid(row=0, column=0)
-
-            label_ID = Label(frame_EnterID, text="Enter member ID you wish to Edit: ", font=('arial', 12),
-                             bg="gainsboro")
-            label_ID.grid(row=0, column=0, padx=(10, 0), pady=10)
-
-            ID = StringVar()
-            entry_enterID = Entry(frame_EnterID, textvariable=ID, width=8, font=('arial', 15))
-            entry_enterID.grid(row=0, column=1, padx=5, pady=10)
-
-            button_fetch = Button(frame_EnterID, text="Fetch ID", font=('arial', 12, 'bold'), width=7,
-                                  bd=4, bg='#03A9F4', command=fetchID, cursor='hand2')
-            button_fetch.grid(row=0, column=2, padx=5, pady=10, sticky=E)
-
-            bottom_frame = LabelFrame(Top, bd=1, padx=10, bg="gainsboro", relief=RIDGE, font=('arial', 13, 'bold'),
-                                      text="Profile")
-            bottom_frame.grid(row=1, column=0)
-
-            frame_profile = Frame(bottom_frame, pady=10, bg="gainsboro", relief=RIDGE)  # padx=10,
-            frame_profile.grid(row=0, column=0)
-
-            # displays Null Image at profile area before ID input
-            def displayPhoto():
-                global photo_labelTop
-                No_photoTop = ImageTk.PhotoImage(Image.open("Null_Image.jpg"))
-                photo_labelTop = Label(frame_profile, image=No_photoTop)
-                photo_labelTop.image = No_photoTop
-                photo_labelTop.grid(row=0, column=0)
-
-            displayPhoto()
-
-            frame_details = Frame(bottom_frame, padx=5, pady=5, bg="gainsboro", relief=RIDGE)
-            frame_details.grid(row=0, column=1)
-
-            lbl_nameTop = Label(frame_details, text="Name :", bg="gainsboro")
-            lbl_nameTop.grid(row=0, sticky=W, padx=5)
-
-            lbl_PositionTop = Label(frame_details, text="Position :", bg="gainsboro")
-            lbl_PositionTop.grid(row=1, sticky=W, padx=5)
-
-            lbl_DepartmentTop = Label(frame_details, text="Department :", bg="gainsboro")
-            lbl_DepartmentTop.grid(row=2, sticky=W, padx=5)
-
-            lbl_LocalCenterTop = Label(frame_details, text="Local Center :", bg="gainsboro")
-            lbl_LocalCenterTop.grid(row=3, sticky=W, padx=5)
-
-            lbl_nameTopValue = Label(frame_details, text="", bg="gainsboro", width=40, anchor=W)
-            lbl_nameTopValue.grid(row=0, column=1, sticky=E, padx=5)
-
-            lbl_PositionTopValue = Label(frame_details, text="", bg="gainsboro", width=40, anchor=W)
-            lbl_PositionTopValue.grid(row=1, column=1, sticky=E, padx=5)
-
-            lbl_DepartmentTopValue = Label(frame_details, text="", bg="gainsboro", width=40, anchor=W)
-            lbl_DepartmentTopValue.grid(row=2, column=1, sticky=E, padx=5)
-
-            lbl_LocalCenterTopValue = Label(frame_details, text="", bg="gainsboro", width=40, anchor=W)
-            lbl_LocalCenterTopValue.grid(row=3, column=1, sticky=E, padx=5)
-
-            profile_button = Button(bottom_frame, text="Edit Profile", font=('arial', 12, 'bold'), height=1, width=11,
-                                    bd=4, bg='#03A9F4', command=edit_profile, cursor='hand2')
-            profile_button.grid(row=1, column=1, padx=10, pady=10, sticky=E)
 
         def Update():
             try:
@@ -685,12 +589,12 @@ class Member:
 
                     try:
                         if filename not in paths:
-                            # print(filename)
+                            print(filename)
                             byte_io = io.BytesIO()
                             my_photo_resized.save(byte_io, format='PNG')
                             byte_io = byte_io.getvalue()
                             Photo_decode = byte_io
-                            paths.append(filename)
+                            #paths.append(filename)
                             Photo = base64.b64encode(Photo_decode)
                             #print(Photo)
                         else:
@@ -738,11 +642,12 @@ class Member:
                     messagebox.showinfo("CGM Database Management System", "Update successful !", parent=root)
 
                 else:
-                    messagebox.showinfo("CGM Database Management System", "Please fill all data to Update !!!",
+                    messagebox.showinfo("CGM Database Management System", "Please fill all required data to Update !!!",
                                         parent=root)
             except NameError:
                 messagebox.showerror("CGM Database Management System",
-                                     "No member ID fetched !!!\nClue : Edit Data before you can update", parent=root)
+                                     "You can only Update after Editing Profile", parent=root)
+
 
         # FUNCTIONS FOR VIEW TAB
         # for View All button
@@ -827,10 +732,19 @@ class Member:
         def clearSearch():
             search_combo.current(0)
             entry_searchItem.delete(0, END)
-            #my_notebook.select(0)...just for test ...to be deleted
 
-        def clearResult():
+        def clearDisplay2():
             delete_TreeviewItems()
+            displayPhoto()
+            lbl_nameTopValue.configure(text='')
+            lbl_PositionTopValue.configure(text='')
+            lbl_DepartmentTopValue.configure(text='')
+            lbl_LocalCenterTopValue.configure(text='')
+            lbl_AddressTopValue.configure(text='')
+            lbl_cityTopValue.configure(text='')
+            lbl_NationalityTopValue.configure(text='')
+            lbl_mobileTopValue.configure(text='')
+            lbl_statusTopValue.configure(text='')
 
         def Delete():
             try:
@@ -857,16 +771,16 @@ class Member:
                     writer.writerow(['ID', 'Prefix', 'First name', 'Surname', 'MiddleName', 'Position', 'Department',
                                      'LocalCenter', 'DoB', 'Age', 'Gender', 'Address', 'City', 'Region', 'Country',
                                      'Nationality', 'MaritalStatus', 'Education', 'Mobile', 'Telephone', 'Email',
-                                     'Occupation', 'Status'])
+                                     'Occupation', 'Status'])  # 'Photo'
                     for row_id in tree.get_children():
-                        row1 = tree.item(row_id)['values'][:23]  # photo is omitted when exporting to csv file
+                        row1 = tree.item(row_id)['values'][:23]  # photo is omitted when exporting to csv file...NB>Photo added for now for check
                         #print(row1)
                         writer.writerow(row1)
                     messagebox.showinfo("CGM Database Management System", '"File Exported As {} on to Desktop"'.format(filename1),
                                         parent=Top_export)
                     Top_export.destroy()
             else:
-                messagebox.showinfo("CGM Database Management System", "Please enter the name you wish to save csv file",
+                messagebox.showinfo("CGM Database Management System", "Please enter the name you wish to save excel file",
                                     parent=Top_export)
 
         # pop up for Export function in View Tab
@@ -888,8 +802,8 @@ class Member:
                 txt_export = Entry(Top_export, font=('arial', 15), textvariable=Email, width=20)
                 txt_export.grid(row=0, column=1, pady=5)
 
-                Btn_exportCSV = Button(Top_export, text="To CSV", font=('arial', 12, 'bold'), height=1,
-                                       width=9, bd=4, bg='#03A9F4', command=export_as_csv, cursor='hand2')
+                Btn_exportCSV = Button(Top_export, text="To Excel", font=('arial', 12, 'bold'), height=1,
+                                       width=9, bd=4, bg='turquoise1', command=export_as_csv, cursor='hand2')
                 Btn_exportCSV.grid(row=1, column=1)
             else:
                 messagebox.showerror("CGM Database Management System",
@@ -951,18 +865,18 @@ class Member:
         self.lblDepartment = Label(DataFrameLEFT, font=('arial', 15), text="Department:", padx=2, pady=2,
                                    bg="Ghost White")
         self.lblDepartment.grid(row=6, column=0, padx=10, sticky=W)
-        self.Department_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=Department,
-                                             values=Departments, font=('arial', 12), width=23)
+        self.Department_combo = ttk.Combobox(DataFrameLEFT,  textvariable=Department,
+                                             values=Departments, font=('arial', 12), width=23)  #state="readonly",
         self.Department_combo.grid(row=6, column=1)
-        self.Department_combo.current(0)
+        #self.Department_combo.current(0)
 
         self.lblL_Center = Label(DataFrameLEFT, font=('arial', 15), text="Local Center:", padx=2, pady=2,
                                  bg="Ghost White")
         self.lblL_Center.grid(row=7, column=0, padx=10, sticky=W)
-        self.L_Center_combo = ttk.Combobox(DataFrameLEFT, state="readonly", textvariable=LocalCenter,
-                                           values=LocalCenters, font=('arial', 12), width=23)
+        self.L_Center_combo = ttk.Combobox(DataFrameLEFT, textvariable=LocalCenter,
+                                           values=LocalCenters, font=('arial', 12), width=23)  # state="readonly"
         self.L_Center_combo.grid(row=7, column=1)
-        self.L_Center_combo.current(0)
+        #self.L_Center_combo.current(0)
 
         self.lblDoB = Label(DataFrameLEFT, font=('arial', 15), text="Date of Birth:", padx=2, pady=2,
                             bg="Ghost White")
@@ -1074,8 +988,6 @@ class Member:
                 global member_photo, filename, my_photo_resized
                 filename = filedialog.askopenfilename(filetypes=(("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"),
                                                                  ("PNG files", "*.png")))
-                # filename2 = os.path.basename(filename)
-                # vague_frame = Frame(photo_frame)
                 my_photo = Image.open(filename)
                 my_photo_resized = my_photo.resize((189, 220), Image.ANTIALIAS)
                 member_photo = ImageTk.PhotoImage(my_photo_resized)
@@ -1109,13 +1021,9 @@ class Member:
                                  bg='#03A9F4', command=addNew, cursor='hand2')
         self.btn_addNew.grid(row=8, column=3, pady=10)
 
-        self.btn_Edit = Button(DataFrameLEFT, text="Edit Data", font=('arial', 12, 'bold'), height=1, width=9, bd=4,
-                               bg='#03A9F4', command=edit_popup, cursor='hand2')
-        self.btn_Edit.grid(row=8, column=4, pady=10)
-
         self.btn_Update = Button(DataFrameLEFT, text="Update", font=('arial', 12, 'bold'), height=1, width=10,
                                  bd=4, bg='#03A9F4', command=Update, cursor='hand2')
-        self.btn_Update.grid(row=8, column=5, pady=10)
+        self.btn_Update.grid(row=8, column=4, pady=10)
 
         self.btnClearDisplay = Button(DataFrameLEFT, text="Clear Display", font=('arial', 12, 'bold'), height=1,
                                       width=10,
@@ -1137,20 +1045,26 @@ class Member:
         # ============================ VIEW TAB ============================================================
 
         # ===========View Tab Frames===============
-        View_DataFrame = Frame(view_tab, bd=1, padx=20, pady=20, relief=RIDGE, bg="Hotpink4", width=get_width*0.87, height=get_height*0.77)
-        View_DataFrame.grid(row=0, column=0)   # pack( fill=X, expand=True)
+        View_MainFrame = Frame(view_tab, bd=1, padx=20, pady=20, relief=RIDGE, bg="Hotpink4", width=get_width*0.87, height=get_height*0.77)
+        View_MainFrame.grid(row=0, column=0)   # pack( fill=X, expand=True)
 
-        View_DataFrameLEFT = Frame(View_DataFrame, bd=1, padx=10, bg="Ghost white", relief=RIDGE, width=get_width*0.87, height=get_height*0.77)
-        View_DataFrameLEFT.grid(padx=18, pady=5)  # pack(fill=X, expand=True, padx=10)
-        View_DataFrameLEFT.grid_columnconfigure(1, weight=1)
-        View_DataFrameLEFT.grid_propagate(False)
-        View_DataFrameLEFT.pack_propagate(False)
+        View_DataFrame = Frame(View_MainFrame, bd=1, padx=10, bg="Ghost white", relief=RIDGE, width=get_width*0.87, height=get_height*0.77)
+        View_DataFrame.grid(padx=18, pady=5)  # pack(fill=X, expand=True, padx=10)
+        View_DataFrame.grid_columnconfigure(1, weight=1)
+        View_DataFrame.grid_propagate(False)
+        View_DataFrame.pack_propagate(False)
+
+        View_DataFrameLEFT = Frame(View_DataFrame, bg="Ghost white", relief=RIDGE)
+        View_DataFrameLEFT.grid(row=0, column=0)
+
+        View_DataFrameRIGHT = Frame(View_DataFrame, bg="Ghost white", relief=RIDGE)
+        View_DataFrameRIGHT.grid(row=0, column=1)
 
         View_DataFrameLEFT_Top = Frame(View_DataFrameLEFT, bg="Ghost white", relief=RIDGE)
-        View_DataFrameLEFT_Top.grid(row=0, column=0, pady=15, ipadx=200)
+        View_DataFrameLEFT_Top.grid(row=0, column=0, pady=15) #, ipadx=200)
 
         View_DataFrameLEFT_Bottom = Frame(View_DataFrameLEFT, bg="Ghost white", relief=RIDGE)
-        View_DataFrameLEFT_Bottom.grid(row=1, column=0, ipadx=200)
+        View_DataFrameLEFT_Bottom.grid(row=1, column=0)  #, ipadx=200)
 
         # ============View Tab Buttons==========
 
@@ -1184,12 +1098,12 @@ class Member:
                                 bd=4, bg='#03A9F4', command=veiw_all, cursor='hand2')
         viewAll_button.grid(row=1, column=0, padx=10, pady=5)
 
-        button_clearResult = Button(View_DataFrameLEFT_Top, text="Clear Result", font=('arial', 12, 'bold'), height=1,
-                                    width=10, bd=4, bg='#03A9F4', command=clearResult, cursor='hand2')
-        button_clearResult.grid(row=1, column=1, padx=10, pady=10)
+        button_clearDisplay2 = Button(View_DataFrameLEFT_Top, text="Clear Display", font=('arial', 12, 'bold'), height=1,
+                                    width=10, bd=4, bg='#03A9F4', command=clearDisplay2, cursor='hand2')
+        button_clearDisplay2.grid(row=1, column=1, padx=10, pady=10)
 
         button_Export = Button(View_DataFrameLEFT_Top, text="Export", font=('arial', 12, 'bold'), height=1,
-                               width=9, bd=4, bg='forest green', command=Export, cursor='hand2')
+                               width=9, bd=4, bg='turquoise1', command=Export, cursor='hand2')
         button_Export.grid(row=1, column=2, padx=10, pady=10)
 
         button_Delete = Button(View_DataFrameLEFT_Top, text="Delete", font=('arial', 12, 'bold'), height=1,
@@ -1198,11 +1112,170 @@ class Member:
 
         # TreeView
         style.configure("mystyle.Treeview.Heading", font=("Calibri", 10, "bold"))
-        columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+        columns = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]  # , 24]
 
         tree = ttk.Treeview(View_DataFrameLEFT_Bottom, selectmode=BROWSE, column=columns, height=30, show='headings',
                             style="mystyle.Treeview")
         tree.grid(row=0, column=0)
+
+        # update profile
+        def Edit_profile():
+            TreeviewContents = tree.get_children()
+            #print(TreeviewContents)
+            if TreeviewContents != ():
+
+                response = messagebox.askquestion("CGM Database Management System",
+                                                  "Do you want to edit selected profile? \nContinue to member info page to edit.")
+                if response == 'yes':
+                    try:
+                        for row in CGM_DB_BackEnd.searchID(var_ID):
+                            self.Prefix_combo.set(row[1])
+                            Firstname.set(row[2])
+                            Surname.set(row[3])
+                            MiddleName.set(row[4])
+                            self.Position_combo.set(row[5])
+                            self.Department_combo.set(row[6])
+                            self.L_Center_combo.set(row[7])
+                            DoB.set(row[8])
+                            Age.set(row[9])
+                            self.Gender_combo.set(row[10])
+                            Res_Address.set(row[11])
+                            City.set(row[12])
+                            self.Region_combo.set(row[13])
+                            Country.set(row[14])
+                            Nationality.set(row[15])
+                            self.M_Status_combo.set(row[16])
+                            self.Education_combo.set(row[17])
+                            Mobile.set(row[18])
+                            Telephone.set((row[19]))
+                            Email.set(row[20])
+                            Occupation.set(row[21])
+                            ChurchStatus.set(row[22])
+                            global it  # required to recall (reuse of image) during update function
+                            it = row[23]
+                            img = PhotoImage(data=it)  # ImageTk.
+                            photo_label.configure(image=img)
+                            photo_label.image = img
+                            my_notebook.select(0)
+                        # print(row)
+                    except NameError:
+                        pass
+                else:
+                    return None
+            else:
+                return None
+
+        def view_worldwide_Data():
+            try:
+                clearDisplay2()  # clears treeview display
+                config = {
+                    "apiKey": "AIzaSyAFoAXhsAUVQ0p72EIppjMVDwZJuigldpE",
+                    "authDomain": "cgm-database.firebaseapp.com",
+                    "databaseURL": "https://cgm-database.firebaseio.com",
+                    "projectId": "cgm-database",
+                    "storageBucket": "cgm-database.appspot.com",
+                    "sagingSenderId": "579778847597",
+                    "Id": "1:579778847597:web:a5c20471d3230095403064",
+                    "surementId": "G-BK3FR3N448"
+                }
+
+                firebase = pyrebase.initialize_app(config)
+
+                # Syncs member Database
+                memberDB = firebase.database()
+                memberDatabase = "memberDatabase"
+
+
+                users = memberDB.child(memberDatabase).get()
+                vals = users.val()  # gets nested dictionary from firebase
+                #print(vals)
+                new_vals = {}
+                for k in sorted(vals, key=len):
+                    new_vals[k] = vals[k]  # gets sorted nested dict by length of keys ie. in ascending order
+                #print(new_vals)
+                for key in new_vals:
+                    #print(key)
+                    tree.insert('', END, values=(key, (new_vals[key]["Prefix"]), (new_vals[key]["First name"]), (new_vals[key]["Last name"]),
+                                (new_vals[key]["Middle name"]), (new_vals[key]["Position"]), (new_vals[key]["Department"]),
+                                (new_vals[key]["Local Center"]), (new_vals[key]["DoB"]), (new_vals[key]["Age"]),
+                                (new_vals[key]["Gender"]),(new_vals[key]["Address"]), (new_vals[key]["City"]),
+                                (new_vals[key]["Region"]), (new_vals[key]["Country"]), (new_vals[key]["Nationality"]),
+                                (new_vals[key]["Marital"]), (new_vals[key]["Education"]), (new_vals[key]["Mobile"]),
+                                (new_vals[key]["Telephone"]), (new_vals[key]["Email"]), (new_vals[key]["Occupation"]),
+                                (new_vals[key]["Status"])))
+
+            except requests.exceptions.ConnectionError:
+                messagebox.showerror("CGM Database Management System",
+                                     "Unable to get data.\nPlease check your internet connection and Try again.",
+                                     parent=root)
+        """
+        def element_clicked(event):
+            item = tree.focus()
+            list2 = (tree.item(item, "values"))
+            it = list2[23]
+            itz = it.encode()
+
+            #itz = values_list[23]
+
+            img = PhotoImage(data=itz)  # ImageTk.
+            photo_labelTop.configure(image=img)
+            photo_labelTop.image = img
+        """
+
+        # Displays profile from Treeview
+        def show(event):
+            global selected_ID
+            selected_item = tree.selection()[0]  # selection of the first item in Treeview row ie. the ID number
+            selected_ID = tree.set(selected_item, '#1')
+            #print(selected_ID)
+            for row in CGM_DB_BackEnd.searchID(selected_ID):
+                global var_ID, it  # useful for query of update_profile function
+                var_ID = row[0]
+                it = row[23]
+                #print(it)
+                img = PhotoImage(data=it)  # ImageTk.
+                photo_labelTop.configure(image=img)
+                photo_labelTop.image = img
+
+            values_list = []
+            for line in tree.selection():     #get_children():
+                for value in tree.item(line)['values']:
+                    values_list.append(value)
+                #print(values_list)
+                #values_list = tuple(v_list)
+
+                lbl_nameTopValue.configure(text=values_list[2] + ' ' + values_list[4] + ' ' + values_list[3])
+                lbl_PositionTopValue.configure(text=values_list[5])
+                lbl_DepartmentTopValue.configure(text=values_list[6])
+                lbl_LocalCenterTopValue.configure(text=values_list[7])
+                lbl_AddressTopValue.configure(text=values_list[11])
+                lbl_cityTopValue.configure(text=values_list[12])
+                lbl_NationalityTopValue.configure(text=values_list[15])
+                lbl_mobileTopValue.configure(text=values_list[18])
+                lbl_statusTopValue.configure(text=values_list[22])
+                #itz = values_list[23]
+                #print(itz)
+
+
+            """
+            for row in CGM_DB_BackEnd.searchID(selected_ID):
+                global var_ID, it  # useful for query of update_profile function
+                var_ID = row[0]
+                lbl_nameTopValue.configure(text=row[2] + ' ' + row[4] + ' ' + row[3])
+                lbl_PositionTopValue.configure(text=row[5])
+                lbl_DepartmentTopValue.configure(text=row[6])
+                lbl_LocalCenterTopValue.configure(text=row[7])
+                lbl_AddressTopValue.configure(text=row[11])
+                lbl_cityTopValue.configure(text=row[12])
+                lbl_NationalityTopValue.configure(text=row[15])
+                lbl_mobileTopValue.configure(text=row[18])
+                lbl_statusTopValue.configure(text=row[22])
+                it = row[23]
+                img = PhotoImage(data=it)  # ImageTk.
+                photo_labelTop.configure(image=img)
+                photo_labelTop.image = img
+            """
+        tree.bind("<<TreeviewSelect>>", show)  # Displays Profile
 
         # Treeview headings
         tree.heading(1, text="ID", anchor=W)
@@ -1225,34 +1298,36 @@ class Member:
         tree.heading(18, text="Education", anchor=W)
         tree.heading(19, text="Mobile", anchor=W)
         tree.heading(20, text="Tel", anchor=W)
-        tree.heading(21, text="Occupation", anchor=W)
-        tree.heading(22, text="Department", anchor=W)
+        tree.heading(21, text="Email", anchor=W)
+        tree.heading(22, text="Occupation", anchor=W)
         tree.heading(23, text="Status", anchor=W)
+        #tree.heading(24, text="Photo", anchor=W)
 
         # Tree view columns n sizes
-        tree.column(1, width=50, minwidth=100, stretch=True)
-        tree.column(2, width=70, minwidth=100, stretch=True)
-        tree.column(3, width=70, minwidth=100, stretch=True)
-        tree.column(4, width=70, minwidth=100, stretch=True)
-        tree.column(5, width=70, minwidth=100, stretch=True)
-        tree.column(6, width=70, minwidth=100, stretch=True)
-        tree.column(7, width=70, minwidth=100, stretch=True)
-        tree.column(8, width=70, minwidth=100, stretch=True)
-        tree.column(9, width=70, minwidth=100, stretch=True)
-        tree.column(10, width=70, minwidth=100, stretch=True)
-        tree.column(11, width=70, minwidth=100, stretch=True)
-        tree.column(12, width=70, minwidth=100, stretch=True)
-        tree.column(13, width=70, minwidth=100, stretch=True)
-        tree.column(14, width=70, minwidth=100, stretch=True)
-        tree.column(15, width=70, minwidth=100, stretch=True)
-        tree.column(16, width=70, minwidth=100, stretch=True)
-        tree.column(17, width=70, minwidth=100, stretch=True)
-        tree.column(18, width=70, minwidth=100, stretch=True)
-        tree.column(19, width=70, minwidth=100, stretch=True)
-        tree.column(20, width=70, minwidth=100, stretch=True)
-        tree.column(21, width=70, minwidth=100, stretch=True)
-        tree.column(22, width=70, minwidth=100, stretch=True)
-        tree.column(23, width=70, minwidth=100, stretch=True)
+        tree.column(1, width=50, minwidth=80, stretch=True)
+        tree.column(2, width=50, minwidth=100, stretch=True)
+        tree.column(3, width=50, minwidth=100, stretch=True)  #width=70, minwidth=100
+        tree.column(4, width=50, minwidth=100, stretch=True)
+        tree.column(5, width=50, minwidth=100, stretch=True)
+        tree.column(6, width=50, minwidth=100, stretch=True)
+        tree.column(7, width=50, minwidth=100, stretch=True)
+        tree.column(8, width=50, minwidth=100, stretch=True)
+        tree.column(9, width=50, minwidth=100, stretch=True)
+        tree.column(10, width=50, minwidth=100, stretch=True)
+        tree.column(11, width=50, minwidth=100, stretch=True)
+        tree.column(12, width=50, minwidth=100, stretch=True)
+        tree.column(13, width=50, minwidth=100, stretch=True)
+        tree.column(14, width=50, minwidth=100, stretch=True)
+        tree.column(15, width=50, minwidth=100, stretch=True)
+        tree.column(16, width=50, minwidth=100, stretch=True)
+        tree.column(17, width=50, minwidth=100, stretch=True)
+        tree.column(18, width=50, minwidth=100, stretch=True)
+        tree.column(19, width=50, minwidth=100, stretch=True)
+        tree.column(20, width=50, minwidth=100, stretch=True)
+        tree.column(21, width=50, minwidth=100, stretch=True)
+        tree.column(22, width=50, minwidth=100, stretch=True)
+        tree.column(23, width=50, minwidth=100, stretch=True)
+        #tree.column(24, width=50, minwidth=100, stretch=True)
 
         # Inserting Scrollbar
         scroll_vertical = ttk.Scrollbar(View_DataFrameLEFT_Bottom, orient="vertical", command=tree.yview)
@@ -1262,6 +1337,92 @@ class Member:
         scroll_horizontal.grid(row=1, column=0, sticky=EW, padx=8, pady=(0, 8))  # (side=BOTTOM, fill='x')
 
         tree.configure(yscrollcommand=scroll_vertical.set, xscrollcommand=scroll_horizontal.set)
+
+        # view right frame...additional
+        right_frame = LabelFrame(View_DataFrameRIGHT, bd=1, padx=5, bg="ghost white", relief=RIDGE, font=('arial', 13, 'bold'),
+                                  text="Profile")
+        right_frame.grid(row=0, column=0)
+
+        frame_profile = Frame(right_frame, pady=10, bg="ghost white", relief=RIDGE)  # padx=10,
+        frame_profile.grid(row=0, column=0, sticky=N)
+
+        # displays Null Image at profile area before ID input
+        def displayPhoto():
+            global photo_labelTop
+            No_photoTop = ImageTk.PhotoImage(Image.open("Null_Image.jpg"))
+            photo_labelTop = Label(frame_profile, image=No_photoTop)
+            photo_labelTop.image = No_photoTop
+            photo_labelTop.grid(row=0, column=0)
+
+        displayPhoto()
+
+        frame_details = Frame(right_frame, pady=5, bg="ghost white", relief=RIDGE)
+        frame_details.grid(row=0, column=1)
+
+        lbl_nameTop = Label(frame_details, text="Name :", bg="ghost white")
+        lbl_nameTop.grid(row=0, sticky=W, padx=5, pady=5)
+
+        lbl_PositionTop = Label(frame_details, text="Position :", bg="ghost white")
+        lbl_PositionTop.grid(row=1, sticky=W, padx=5, pady=5)
+
+        lbl_DepartmentTop = Label(frame_details, text="Department :", bg="ghost white")
+        lbl_DepartmentTop.grid(row=2, sticky=W, padx=5, pady=5)
+
+        lbl_LocalCenterTop = Label(frame_details, text="Local Center :", bg="ghost white")
+        lbl_LocalCenterTop.grid(row=3, sticky=W, padx=5, pady=5)
+
+        lbl_AddressTop = Label(frame_details, text="Res. Address :", bg="ghost white")
+        lbl_AddressTop.grid(row=4, sticky=W, padx=5, pady=5)
+
+        lbl_cityTop = Label(frame_details, text="City :", bg="ghost white")
+        lbl_cityTop.grid(row=5, sticky=W, padx=5, pady=5)
+
+        lbl_NationalityTop = Label(frame_details, text="Nationality :", bg="ghost white")
+        lbl_NationalityTop.grid(row=6, sticky=W, padx=5, pady=5)
+
+        lbl_mobileTop = Label(frame_details, text="Mobile :", bg="ghost white")
+        lbl_mobileTop.grid(row=7, sticky=W, padx=5, pady=5)
+
+        lbl_statusTop = Label(frame_details, text="Status :", bg="ghost white")
+        lbl_statusTop.grid(row=8, sticky=W, padx=5, pady=5)
+
+
+        # profile details values
+        lbl_nameTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_nameTopValue.grid(row=0, column=1, sticky=E, padx=5)
+
+        lbl_PositionTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_PositionTopValue.grid(row=1, column=1, sticky=E, padx=5)
+
+        lbl_DepartmentTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_DepartmentTopValue.grid(row=2, column=1, sticky=E, padx=5)
+
+        lbl_LocalCenterTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_LocalCenterTopValue.grid(row=3, column=1, sticky=E, padx=5)
+
+        lbl_AddressTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_AddressTopValue.grid(row=4, column=1, sticky=E, padx=5)
+
+        lbl_cityTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_cityTopValue.grid(row=5, column=1, sticky=E, padx=5)
+
+        lbl_NationalityTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_NationalityTopValue.grid(row=6, column=1, sticky=E, padx=5)
+
+        lbl_mobileTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_mobileTopValue.grid(row=7, column=1, sticky=E, padx=5)
+
+        lbl_statusTopValue = Label(frame_details, text="", bg="ghost white", width=20, anchor=W)
+        lbl_statusTopValue.grid(row=8, column=1, sticky=E, padx=5)
+
+
+        profile_button = Button(right_frame, text="Edit Profile", font=('arial', 12, 'bold'), height=1, width=11,
+                                bd=4, bg='#03A9F4', cursor='hand2', command=Edit_profile)
+        profile_button.grid(row=1, column=1, padx=10, pady=(70, 40))  #, sticky=E)
+
+        viewWorldwide_button = Button(View_DataFrameRIGHT, text="View worldwide Data", font=('arial', 12, 'bold'), height=2, width=12,
+                                bd=4, bg='turquoise1', cursor='hand2', wraplength=150, command=view_worldwide_Data)
+        viewWorldwide_button.grid(row=1, column=0, padx=10, pady=(40, 40), sticky=S)
 
         # ================================= ATTENDANCE TAB ==================================================
         # Attendance page functions
@@ -1274,7 +1435,7 @@ class Member:
             txt_NewConverts.delete(0, END)
             txt_NewMembers.delete(0, END)
 
-        def Submit_Att():
+        def Addnew_Att():
             if (len(ServiceDate.get()) and len(Males.get()) and len(Females.get()) and len(Children.get())
                     and len(TotalAttendance.get()) and len(NewMembers.get()) and len(NewConverts.get()) != 0):
                 # #### ADD IF STATEMENTS TO CHECK IF ANY ENTRY IS NOT A NUMBER / DIGIT   ######
@@ -1308,18 +1469,18 @@ class Member:
 
         def Edit_Att():
             try:
-                edit_selected_item = tree_Att.selection()[
-                    0]  # selection of the first item in Treeview row ie. the ID number
+                edit_selected_item = tree_Att.selection()[0]  # selection of the first item in Treeview row ie. the ID number
                 global Attendance_ListNo
                 Attendance_ListNo = tree_Att.set(edit_selected_item, '#1')
                 for row in CGM_DB_Attendance_Backend.searchID(Attendance_ListNo):
-                    ServiceDate.set(row[1])
-                    Males.set(row[2])
-                    Females.set(row[3])
-                    Children.set(row[4])
-                    TotalAttendance.set(row[5])
-                    NewMembers.set(row[6])
-                    NewConverts.set(row[7])
+                    if Attendance_ListNo != '':
+                        ServiceDate.set(row[1])
+                        Males.set(row[2])
+                        Females.set(row[3])
+                        Children.set(row[4])
+                        TotalAttendance.set(row[5])
+                        NewMembers.set(row[6])
+                        NewConverts.set(row[7])
             except IndexError:
                 messagebox.showerror("CGM Database Management System", "Select item in Attendance list before Edit !!!",
                                      parent=root)
@@ -1327,8 +1488,10 @@ class Member:
         def Update_Att():
             try:
                 if Attendance_ListNo == '':
-                    messagebox.showerror("CGM Database Management System",
-                                         "You can only Update after editing an existing data !!!", parent=root)
+                    pass
+                    #print("first case scenario works")
+                    #messagebox.showerror("CGM Database Management System",
+                                         #"You can only Update after editing an existing data !!!", parent=root)
                 elif (len(ServiceDate.get()) and len(Males.get()) and len(Females.get()) and len(Children.get())
                       and len(TotalAttendance.get()) and len(NewMembers.get()) and len(NewConverts.get()) != 0):
                     if Males.get().isnumeric() and Females.get().isnumeric() and Children.get().isnumeric() and \
@@ -1344,6 +1507,7 @@ class Member:
                         tree_Att.insert("", END, values=result2)
                         ClearEntry_Att()  # clears entries after data is sent to DB
                         messagebox.showinfo("CGM Database Management System", "Update successful !", parent=root)
+
                     else:
                         messagebox.showerror("CGM Database Management System",
                                              "Please type in Numbers (Integers) only !", parent=root)
@@ -1353,6 +1517,46 @@ class Member:
                 messagebox.showinfo("CGM Database Management System",
                                     "You can only Update after editing an existing data !!!", parent=root)
 
+        def view_worldwide_Attendance():
+            try:
+                delete_Treeview_AttItems()  # clears treeview display
+                config = {
+                    "apiKey": "AIzaSyAFoAXhsAUVQ0p72EIppjMVDwZJuigldpE",
+                    "authDomain": "cgm-database.firebaseapp.com",
+                    "databaseURL": "https://cgm-database.firebaseio.com",
+                    "projectId": "cgm-database",
+                    "storageBucket": "cgm-database.appspot.com",
+                    "sagingSenderId": "579778847597",
+                    "Id": "1:579778847597:web:a5c20471d3230095403064",
+                    "surementId": "G-BK3FR3N448"
+                }
+
+                firebase = pyrebase.initialize_app(config)
+
+                # Syncs attendance Database
+                attendanceDB = firebase.database()
+                attendanceDatabase = "attendanceDatabase"
+                #overall_IDs = []
+                paths = attendanceDB.child(attendanceDatabase).get()
+
+                for path in paths.each():
+                    #print(path.key())
+                    #print(path.val())
+                    dict_values = []
+                    data = path.val()
+                    for value in data.values():
+                        dict_values.append(value)  # makes list of values of dictionary
+                    #print(dict_values)
+
+                    tree_Att.insert('', END, values=(path.key(), dict_values[0], dict_values[1], dict_values[2], dict_values[3],
+                                                 dict_values[4], dict_values[5], dict_values[6]))   #dict_values)
+
+            except requests.exceptions.ConnectionError:
+                messagebox.showerror("CGM Database Management System",
+                                     "Unable to get data.\nPlease check your internet connection and Try again.",
+                                     parent=root)
+
+
         def ShowList_Att():
             delete_Treeview_AttItems()
             for row in CGM_DB_Attendance_Backend.viewData():
@@ -1360,7 +1564,6 @@ class Member:
                                 values=row)  # (row[1]), (row[2]), (row[3]), (row[4]), (row[5]), (row[6]), (row[7])))
 
         def BarChart_Att():
-            row = CGM_DB_Attendance_Backend.getServiceDate()
             try:
                 Top_Bar = Toplevel(root)
                 Top_Bar.title("CGM Database Management System")
@@ -1530,16 +1733,23 @@ class Member:
         btnClearEntry_Att.grid(row=6, column=0, pady=50)
 
         btnSubmit_Att = Button(Attendance_DataFrame_Left_T, text="Submit", font=('arial', 12, 'bold'), height=1, width=9,
-                               bd=4, bg='#03A9F4', command=Submit_Att, cursor='hand2')
+                               bd=4, bg='#03A9F4', command=Addnew_Att, cursor='hand2')
         btnSubmit_Att.grid(row=6, column=1, pady=50)
+
+        btnUpdate_Att = Button(Attendance_DataFrame_Left_T, text="Update", font=('arial', 12, 'bold'), height=1, width=9,
+                               bd=4, bg='#03A9F4', command=Update_Att, cursor='hand2')
+        btnUpdate_Att.grid(row=6, column=3, pady=50)
 
         btnEdit_Att = Button(Attendance_DataFrame_Left_T, text="Edit", font=('arial', 12, 'bold'), height=1, width=9,
                              bd=4, bg='#03A9F4', command=Edit_Att, cursor='hand2')
         btnEdit_Att.grid(row=6, column=2, pady=50)
 
-        btnUpdate_Att = Button(Attendance_DataFrame_Left_T, text="Update", font=('arial', 12, 'bold'), height=1, width=9,
-                               bd=4, bg='#03A9F4', command=Update_Att, cursor='hand2')
-        btnUpdate_Att.grid(row=6, column=3, pady=50)
+
+
+        viewWorldwide_buttonAtt = Button(Attendance_DataFrame_Left_B, text="View worldwide Attendance", font=('arial', 12, 'bold'),
+                                      height=2, width=12, pady=5,
+                                      bd=4, bg='turquoise1', cursor='hand2', wraplength=150, command=view_worldwide_Attendance)
+        viewWorldwide_buttonAtt.grid(row=0, column=1, padx=10, pady=(40, 40))  #, sticky=S)
 
         # Right frame buttons
 
