@@ -4,6 +4,10 @@ This is a setup.py file using cx_Freeze
 
 Usage:
     python setup.py build_exe --excludes=matplotlib.tests,numpy.random._examples
+
+    after build up...whilst first running. [gcloud error pops up]
+    delete previous gcloud folder and replace by these 3 files: gcloud, gcloud-0.17.0 ...., google
+    #***NB: ignore lines 8 an 9. Issue fixed by adding their path to setup file code
 """
 
 import cx_Freeze
@@ -32,7 +36,9 @@ cx_Freeze.setup(
                            'include_files': [
                                os.path.join(PYTHON_INSTALL_DIR, 'DLLs', 'tk86t.dll'),
                                os.path.join(PYTHON_INSTALL_DIR, 'DLLs', 'tcl86t.dll'),
-                              ("C:/Users/JAMES ASMAH/AppData/Local/Programs/Python/Python38/Lib/site-packages/mpl_toolkits/")
+                              ("C:/Users/JAMES ASMAH/AppData/Local/Programs/Python/Python38/Lib/site-packages/mpl_toolkits/"),
+                              ("C:/Users/JAMES ASMAH/AppData/Local/Programs/Python/Python38/Lib/site-packages/gcloud"),
+                               ("C:/Users/JAMES ASMAH/AppData/Local/Programs/Python/Python38/Lib/site-packages/gcloud-0.17.0-py3.8.egg-info")
                                # ("C:/Users/JAMES ASMAH/AppData/Local/Programs/Python/Python38/Lib/site-packages/pytest/")
                            ]}},
     executables=executables

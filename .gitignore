@@ -1,3 +1,11 @@
 .idea/
+_pycache_
 memberCGM.db
 attendanceCGM.db
+CGM_firebase_configuration.txt
+memberCGM_Acc.db
+attendanceCGM_Acc.db
+memberCGM_Kum.db
+attendanceCGM_Kum.db
+
+
