@@ -246,14 +246,7 @@ class Member:
                 # Configuration for firebase
 
                 config = {
-                    "apiKey": "AIzaSyAFoAXhsAUVQ0p72EIppjMVDwZJuigldpE",
-                    "authDomain": "cgm-database.firebaseapp.com",
-                    "databaseURL": "https://cgm-database.firebaseio.com",
-                    "projectId": "cgm-database",
-                    "storageBucket": "cgm-database.appspot.com",
-                    "sagingSenderId": "579778847597",
-                    "Id": "1:579778847597:web:a5c20471d3230095403064",
-                    "surementId": "G-BK3FR3N448"
+
                 }
 
                 firebase = pyrebase.initialize_app(config)
